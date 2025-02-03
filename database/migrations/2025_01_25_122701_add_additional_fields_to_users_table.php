@@ -37,6 +37,12 @@ return new class extends Migration
             $table->text('description', 2048)->nullable();
             $table->boolean('allow_adult')->default(false);
         });
+
+        Schema::table('sessions', function (Blueprint $table) {
+            $table->dropIndex(['user_id']);
+            $table->dropColumn('user_id');
+            $table->foreignUlid('user_id')->nullable()->index();
+        });
     }
 
     public function down(): void
