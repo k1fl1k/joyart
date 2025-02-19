@@ -11,13 +11,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Create the ENUM types for role and gender
-        $roleValues = implode(',', array_map(fn($value) => "'{$value}'", array_column(Role::cases(), 'value')));
-        DB::unprepared("CREATE TYPE role AS ENUM ({$roleValues});");
-
-        $genderValues = implode(',', array_map(fn($value) => "'{$value}'", array_column(Gender::cases(), 'value')));  // Fixed: use Gender::cases() for gender
-        DB::unprepared("CREATE TYPE gender AS ENUM ({$genderValues});");
-
         // Update the users table
         Schema::table('users', function (Blueprint $table) {
             // Drop and recreate the ID with ULID
