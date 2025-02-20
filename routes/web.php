@@ -1,8 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use k1fl1k\joyart\Http\Controllers\WelcomeController;
 
-Route::view('/', 'welcome');
+Route::get('/', [WelcomeController::class, 'showWelcome'])->name('welcome');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
