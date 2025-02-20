@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('artworks', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->foreignUlid('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignUlid('tag_id')->nullable()->constrained('tags')->onDelete('cascade'); // Додаємо зв’язок з тегами
+            $table->foreignUlid('tag_id')->nullable()->constrained('tags')->onDelete('cascade');
             $table->enum('type', ['image', 'animation', 'video']);
             $table->string('md5')->unique();
             $table->enum('rating', ['general', 'sensitive', 'questionable']);

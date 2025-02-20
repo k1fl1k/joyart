@@ -55,8 +55,7 @@ return new class extends Migration
         });
 
         // Drop the ENUM types
-        DB::unprepared('DROP TYPE role');
-        DB::unprepared('DROP TYPE gender');
+
 
         // Modify the sessions table
         Schema::table('sessions', function (Blueprint $table) {
