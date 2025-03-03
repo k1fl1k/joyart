@@ -4,70 +4,73 @@ namespace k1fl1k\joyart\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use k1fl1k\joyart\Models\Artwork;
 use k1fl1k\joyart\Models\Tag;
-use Illuminate\Support\Str;
 use k1fl1k\joyart\Models\User;
+use League\ColorExtractor\Palette;
+use League\ColorExtractor\ColorExtractor;
 
 class SafebooruService
 {
-    protected string $apiUrl = "https://safebooru.org/index.php?page=dapi&s=post&q=index";
+    protected string $apiUrl = 'https://safebooru.org/index.php?page=dapi&s=post&q=index&limit=100'; // Наприклад, обмежимо до 100 записів
 
-    public function fetchAndStoreArtworks()
+    public function fetchAndStoreArtworks(int $maxImages = 10) // Додаємо параметр для обмеження
     {
         try {
             $response = Http::get($this->apiUrl);
 
             if ($response->failed()) {
-                Log::error("API Safebooru не доступний");
+                Log::error('API Safebooru не доступний');
                 return;
             }
 
             $xml = simplexml_load_string($response->body());
+            $count = 0;
 
             foreach ($xml->post as $post) {
-                $this->storeArtwork($post);
-            }
+                if ($count >= $maxImages) {
+                    break; // Зупиняємо, якщо досягли ліміту
+                }
 
+                $this->storeArtwork($post);
+                $count++;
+            }
         } catch (\Exception $e) {
-            Log::error("Помилка отримання даних з API: " . $e->getMessage());
+            Log::error('Помилка отримання даних з API: ' . $e->getMessage());
         }
     }
 
     protected function storeTags($tagsString)
     {
         $tags = explode(' ', trim($tagsString));
-        $tagId = null;
+        $tagIds = [];
 
         foreach ($tags as $tagName) {
             if (empty($tagName)) continue;
 
-            // Перевіряємо, чи існує тег
-            $tag = Tag::where('name', $tagName)->first();
+            $existingTag = Tag::where('name', $tagName)->first();
 
-            if (!$tag) {
-                $tag = new Tag([
+            if ($existingTag) {
+                $tagIds[] = $existingTag->id;
+            } else {
+                $slug = $this->generateUniqueSlug($tagName);
+
+                $tag = Tag::create([
                     'id' => (string) Str::ulid(),
                     'name' => $tagName,
-                    'slug' => Str::slug($tagName),
+                    'slug' => $slug,
                     'meta_title' => ucfirst($tagName),
-                    'meta_description' => "Tag description for " . $tagName,
+                    'meta_description' => 'Tag description for ' . $tagName,
                 ]);
-                $tag->save();
-                Log::info("✅ Створено новий тег: " . json_encode($tag->toArray()));
-            } else {
-                Log::info("🔹 Знайдено існуючий тег: " . json_encode($tag->toArray()));
-            }
 
-            // Зберігаємо перший знайдений тег
-            if (!$tagId) {
-                $tagId = $tag->id;
+                $tagIds[] = $tag->id;
             }
         }
 
-        Log::info("🟢 Повертаємо tag_id: " . $tagId);
-        return $tagId;
+        return $tagIds;
     }
+
 
     protected function storeArtwork($post)
     {
@@ -77,20 +80,9 @@ class SafebooruService
             return;
         }
 
-        // Отримуємо ID першого збереженого тегу
-        $tagId = $this->storeTags((string) $post['tags']);
+        $tagIds = $this->storeTags((string) $post['tags']);
+        $userId = User::where('role', 'admin')->value('id') ?? null;
 
-        Log::info("🟡 tag_id для нового Artwork: " . ($tagId ?? 'NULL'));
-
-        $adminUser = User::where('role', 'admin')->first();
-
-        if (!$adminUser) {
-            Log::error("❌ Адміністратор не знайдений. Використовується стандартний user_id.");
-        } else {
-            $userId = $adminUser->id;
-            Log::info("👤 Знайдено адміна: " . json_encode($adminUser->toArray()));
-        }
-        // Створюємо новий запис про зображення
         $artwork = new Artwork([
             'id' => (string) Str::ulid(),
             'md5' => $md5,
@@ -102,30 +94,56 @@ class SafebooruService
             'thumbnail' => (string) $post['preview_url'],
             'original' => (string) $post['file_url'],
             'is_vip' => false,
-            'colors' => json_encode([]),
+            'colors' => json_encode($this->extractColors((string) $post['file_url'])),
             'source' => (string) $post['source'],
             'is_published' => true,
-            'slug' => Str::slug("artwork-" . $md5),
-            'meta_title' => "Artwork " . $md5,
-            'meta_description' => "An artwork from Safebooru",
+            'slug' => $this->generateUniqueSlug('artwork-' . $md5),
+            'meta_title' => 'Artwork ' . $md5,
+            'meta_description' => 'An artwork from Safebooru',
             'image' => (string) $post['sample_url'],
-            'image_alt' => "Image from Safebooru",
+            'image_alt' => 'Image from Safebooru',
             'user_id' => $userId,
             'type' => 'image',
-            'tag_id' => $tagId, // Додаємо перший тег до зображення
         ]);
 
-        Log::info("📝 Artwork перед збереженням: " . json_encode($artwork->toArray()));
-
         $artwork->save();
+        $artwork->tags()->attach($tagIds);
+    }
 
-        if (!$artwork->exists) {
-            Log::error("❌ Не вдалося зберегти запис: " . json_encode($artwork->toArray()));
-        } else {
-            Log::info("✅ Запис успішно збережено: " . json_encode($artwork->toArray()));
+    protected function extractColors($imageUrl)
+    {
+        try {
+            $imagePath = tempnam(sys_get_temp_dir(), 'color');
+            file_put_contents($imagePath, file_get_contents($imageUrl));
+
+            $palette = Palette::fromFilename($imagePath);
+            $extractor = new ColorExtractor($palette);
+            $colors = $extractor->extract(5);
+
+            unlink($imagePath);
+            return array_map(fn($color) => sprintf("#%06X", $color), $colors);
+        } catch (\Exception $e) {
+            Log::error('Помилка визначення кольорів: ' . $e->getMessage());
+            return [];
         }
     }
 
+    protected function generateUniqueSlug($baseSlug)
+    {
+        $slug = Str::slug($baseSlug);
+        $count = 1;
+
+        while (Artwork::where('slug', $slug)->exists()) {
+            $slug = Str::slug($baseSlug) . '-' . $count;
+            $count++;
+        }
+        while (Tag::where('slug', $slug)->exists()) { // Перевіряємо в `tags`
+            $slug = Str::slug($baseSlug) . '-' . $count;
+            $count++;
+        }
+
+        return $slug;
+    }
 
     protected function mapRating(string $rating)
     {

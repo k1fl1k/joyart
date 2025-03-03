@@ -49,4 +49,9 @@ class Tag extends Model
     {
         return $this->hasMany(Tag::class, 'parent_id');
     }
+
+    public function artworks()
+    {
+        return $this->belongsToMany(Artwork::class, 'artwork_tag');
+    }
 }

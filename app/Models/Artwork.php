@@ -31,4 +31,9 @@ class Artwork extends Model
     ];
 
     protected $guarded = [];
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'artwork_tag');
+    }
 }
