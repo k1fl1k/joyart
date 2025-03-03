@@ -18,13 +18,7 @@
                 <input type="text" placeholder="Search" />
             </div>
             <div class="user-profile">
-                <div class="profile-circle">
-                    <img src="{{ Auth::user()->avatar ??  asset('storage/images/avatar-male.png') }}" alt="User Avatar">
-                </div>
-                <div class="username">
-                    <span>{{ Auth::user()->name ?? 'Username' }}</span>
-                    <span class="role">role: {{ Auth::user()->role ?? 'User' }}</span>
-                </div>
+                @livewire('user-profile-dropdown')
             </div>
         </div>
         <div class="content">

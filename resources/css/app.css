@@ -3,16 +3,122 @@
 @tailwind utilities;
 
 body {
-    margin: 0;
-    font-family: 'Kodchasan';
+    font-family: 'Kodchasan', sans-serif;
     background: linear-gradient(to bottom, #5995c5, #121212);
-    background-attachment: fixed; /* Фіксує градієнт, щоб він не повторювався */
-    background-size: 100% 100vh; /* Розтягує градієнт на всю сторінку */
+    background-attachment: fixed;
     height: 100vh;
     color: #ffffff;
 }
 
+.bg-gray-900 {
+    background-color: #1c1c1c;
+}
 
+.bg-gray-800 {
+    background-color: #222627;
+}
+
+.text-blue-400 {
+    color: #38a9f0;
+}
+
+.rounded-lg {
+    border-radius: 12px;
+}
+
+/* Register Form Styles */
+.register-form-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #1c1c1c;
+}
+
+.register-form-wrapper {
+    width: 100%;
+    max-width: 400px;
+    background-color: #222627;
+    padding: 32px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.register-form-header {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 700;
+    color: #38a9f0;
+}
+
+.register-form-group {
+    margin-bottom: 16px;
+}
+
+.register-form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #e0e0e0;
+    margin-bottom: 8px;
+}
+
+.register-form-input {
+    width: 100%;
+    padding: 8px;
+    background-color: #333;
+    border: 1px solid #555;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    outline: none;
+}
+
+.register-form-input:focus {
+    border-color: #38a9f0;
+    box-shadow: 0 0 4px rgba(56, 169, 240, 0.6);
+}
+
+.register-form-error {
+    color: #f44336;
+    font-size: 12px;
+}
+
+.register-form-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #38a9f0;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.register-form-button:hover {
+    background-color: #2a8cba;
+}
+
+.register-form-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.register-form-footer a {
+    font-size: 14px;
+    color: #38a9f0;
+    text-decoration: none;
+}
+
+.register-form-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Additional Styles for Dashboard and UI Elements */
 .dashboard {
     display: flex;
     flex-direction: column;
@@ -49,22 +155,17 @@ body {
     gap: 10px;
 }
 
-.profile-circle {
-    width: 40px;
-    height: 40px;
-    background-color: #38a9f0;
-    border-radius: 50%;
-}
-
 .username {
     font-size: 20px;
     text-align: right;
+    margin-left: 10px;
 }
 
 .role {
     font-size: 12px;
     color: #999999;
     display: flex;
+    margin-left: 10px;
 }
 
 .content {
@@ -85,7 +186,7 @@ body {
     scrollbar-color: #38a9f0 #1c1c1c;
 }
 
-/* Для Chrome, Edge */
+/* For Chrome, Edge */
 .sidebar::-webkit-scrollbar {
     width: 8px;
 }
@@ -115,7 +216,7 @@ body {
     padding-top: 100px;
 }
 
-/* Додаємо стилі для галереї */
+/* Gallery Styles */
 .gallery {
     display: flex;
     flex-wrap: wrap;
@@ -128,7 +229,6 @@ body {
     border-radius: 12px;
 }
 
-
 .gallery-item {
     width: calc(20% - 10px);
     box-sizing: border-box;
@@ -137,7 +237,7 @@ body {
 }
 
 .gallery-image {
-    width: 100%; /* Заповнюємо контейнер картинкою */
+    width: 100%;
     height: 220px;
     width: 220px;
 }
@@ -154,5 +254,39 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+/* Dropdown Styles */
+.x-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.x-dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: #222627;
+    min-width: 160px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    z-index: 1000;
+}
+
+.x-dropdown:hover .x-dropdown-content {
+    display: block;
+}
+
+.x-dropdown-link {
+    color: #e0e0e0;
+    padding: 10px 16px;
+    display: block;
+    text-decoration: none;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.x-dropdown-link:hover {
+    background-color: #2a2a2a;
+    color: #38a9f0;
 }
 
