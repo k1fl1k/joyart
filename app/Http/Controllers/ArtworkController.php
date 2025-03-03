@@ -3,8 +3,8 @@
 namespace k1fl1k\joyart\Http\Controllers;
 
 use k1fl1k\joyart\Models\Artwork;
-use App\Http\Requests\StoreArtworkRequest;
-use App\Http\Requests\UpdateArtworkRequest;
+use k1fl1k\joyart\Http\Requests\StoreArtworkRequest;
+use k1fl1k\joyart\Http\Requests\UpdateArtworkRequest;
 
 class ArtworkController extends Controller
 {

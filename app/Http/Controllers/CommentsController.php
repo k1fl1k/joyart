@@ -3,8 +3,8 @@
 namespace k1fl1k\joyart\Http\Controllers;
 
 use k1fl1k\joyart\Models\Comments;
-use App\Http\Requests\StoreCommentsRequest;
-use App\Http\Requests\UpdateCommentsRequest;
+use k1fl1k\joyart\Http\Requests\StoreCommentsRequest;
+use k1fl1k\joyart\Http\Requests\UpdateCommentsRequest;
 
 class CommentsController extends Controller
 {

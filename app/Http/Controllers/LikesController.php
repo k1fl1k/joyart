@@ -3,8 +3,8 @@
 namespace k1fl1k\joyart\Http\Controllers;
 
 use k1fl1k\joyart\Models\Likes;
-use App\Http\Requests\StoreLikesRequest;
-use App\Http\Requests\UpdateLikesRequest;
+use k1fl1k\joyart\Http\Requests\StoreLikesRequest;
+use k1fl1k\joyart\Http\Requests\UpdateLikesRequest;
 
 class LikesController extends Controller
 {

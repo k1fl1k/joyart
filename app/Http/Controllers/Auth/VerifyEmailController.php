@@ -2,10 +2,10 @@
 
 namespace k1fl1k\joyart\Http\Controllers\Auth;
 
-use k1fl1k\joyart\Http\Controllers\Controller;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\RedirectResponse;
+use k1fl1k\joyart\Http\Controllers\Controller;
 
 class VerifyEmailController extends Controller
 {

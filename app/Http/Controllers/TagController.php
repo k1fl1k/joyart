@@ -3,8 +3,8 @@
 namespace k1fl1k\joyart\Http\Controllers;
 
 use k1fl1k\joyart\Models\Tag;
-use App\Http\Requests\StoreTagRequest;
-use App\Http\Requests\UpdateTagRequest;
+use k1fl1k\joyart\Http\Requests\StoreTagRequest;
+use k1fl1k\joyart\Http\Requests\UpdateTagRequest;
 
 class TagController extends Controller
 {

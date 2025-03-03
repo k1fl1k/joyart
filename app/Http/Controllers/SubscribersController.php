@@ -3,8 +3,8 @@
 namespace k1fl1k\joyart\Http\Controllers;
 
 use k1fl1k\joyart\Models\Subscribers;
-use App\Http\Requests\StoreSubscribersRequest;
-use App\Http\Requests\UpdateSubscribersRequest;
+use k1fl1k\joyart\Http\Requests\StoreSubscribersRequest;
+use k1fl1k\joyart\Http\Requests\UpdateSubscribersRequest;
 
 class SubscribersController extends Controller
 {

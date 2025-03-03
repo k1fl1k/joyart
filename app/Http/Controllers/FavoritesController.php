@@ -3,8 +3,8 @@
 namespace k1fl1k\joyart\Http\Controllers;
 
 use k1fl1k\joyart\Models\Favorites;
-use App\Http\Requests\StoreFavoritesRequest;
-use App\Http\Requests\UpdateFavoritesRequest;
+use k1fl1k\joyart\Http\Requests\StoreFavoritesRequest;
+use k1fl1k\joyart\Http\Requests\UpdateFavoritesRequest;
 
 class FavoritesController extends Controller
 {
