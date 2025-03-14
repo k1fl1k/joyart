@@ -36,4 +36,9 @@ class Artwork extends Model
     {
         return $this->belongsToMany(Tag::class, 'artwork_tag');
     }
+
+    public function favorites()
+    {
+        return $this->hasMany(Favorites::class, 'artwork_id');
+    }
 }
