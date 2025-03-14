@@ -15,7 +15,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+        <div class="    ">
             <livewire:layout.navigation />
 
             <!-- Page Heading -->
@@ -32,5 +32,6 @@
                 {{ $slot }}
             </main>
         </div>
+        <script src="{{ asset('js/app.js') }}"></script>
     </body>
 </html>

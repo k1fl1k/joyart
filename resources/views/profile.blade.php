@@ -1,27 +1,68 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Profile') }}
-        </h2>
-    </x-slot>
-
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    <livewire:profile.update-profile-information-form />
+        <div class="profile-container">
+            <div class="profile-info">
+                <!-- Аватар і ім'я -->
+                <div class="profile-header">
+                    <div class="profile-circle">
+                        <img src="{{ auth()->user()->avatar ?? asset('storage/images/avatar-male.png') }}"
+                             alt="User Avatar">
+                    </div>
+                    <div>
+                        <h2>{{ auth()->user()->username }}</h2>
+                        <p class="text-gray-400">role: {{ auth()->user()->role }}</p>
+                    </div>
                 </div>
-            </div>
 
-            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    <livewire:profile.update-password-form />
+                <!-- Блоки інформації -->
+                <div class="profile-content">
+                    <!-- Опис користувача -->
+                    <div class="profile-description">
+                        <h3>Description</h3>
+                        <p>{{ auth()->user()->description ?? 'No description available.' }}</p>
+                        <a class="profile-edit-icon">✎</a>
+                    </div>
+
+                    <!-- Пости користувача / Лайкнуті пости -->
+                    <div class="profile-posts">
+                        <div class="flex items-center gap-3">
+                            <h3 id="posts-title">USER POSTS:</h3>
+                            <button id="toggle-button" class="profile-toggle-button" data-current="user">
+                                👤
+                            </button>
+                        </div>
+
+                        <!-- Пости користувача -->
+                        <div id="user-posts">
+                            @forelse($userPosts as $post)
+                                <div class="post-card">
+                                    <img src="{{ asset($post->thumbnail) }}" alt="meta_title">
+                                </div>
+                            @empty
+                                <p>No posts yet.</p>
+
+                            @endforelse
+                        </div>
+
+                        <!-- Лайкнуті пости -->
+                        <div id="liked-posts" style="display: none;">
+                            @forelse($likedPosts as $post)
+                                <div class="post-card">
+                                    <img src="{{ asset($post->thumbnail) }}" alt="Post Thumbnail">
+                                    <p>{{ $post->meta_title }}</p>
+                                </div>
+                            @empty
+                                <p>No liked posts yet.</p>
+                            @endforelse
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    <livewire:profile.delete-user-form />
+                <!-- Кнопка налаштувань -->
+                <div class="mt-6 flex justify-end">
+                    <a href="{{ route('settings') }}" class="profile-settings-btn">
+                        Settings
+                    </a>
                 </div>
             </div>
         </div>

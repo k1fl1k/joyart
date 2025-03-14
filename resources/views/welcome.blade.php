@@ -22,39 +22,19 @@
             </div>
         </div>
         <div class="content">
-            @if($tags->isNotEmpty())
-            <div class="sidebar">
-                @foreach ($tags as $tag)
-                    <div class="tag">
-                        {{ $tag->name }}
-                        @if ($tag->subtags->isNotEmpty())
-                            <div class="subtags">
-                                @foreach ($tag->subtags as $subtag)
-                                    <div class="subtag">{{ $subtag->name }}</div>
-                                @endforeach
-                            </div>
-                        @endif
-                    </div>
-                @endforeach
-            </div>
-            @else
-                <div class="sidebar">
-                    <div class="tag">
-                        <div class="subtags">
-                            <div class="subtag"></div>
-                        </div>
-                    </div>
-                </div>
-            @endif
-            @if($images->isNotEmpty())
+            <x-tags-sidebar :tags="$tags"/>
+        @if($images->isNotEmpty())
             <div class="main">
                 <div class="gallery">
                     @foreach ($images as $image)
                         <div class="gallery-item">
-                            <img src="{{ $image->thumbnail }}" alt="{{ $image->title }}" class="gallery-image" />
+                            <img src="{{ $image->thumbnail }}" alt="{{ $image->title }}" loading="lazy" class="gallery-image" />
                             <p>{{ $image->title }}</p>
                         </div>
                     @endforeach
+                        <div class="pagination">
+                            {{ $images->links() }}
+                        </div>
                 </div>
             </div>
                 @else
