@@ -13,9 +13,9 @@ use League\ColorExtractor\ColorExtractor;
 
 class SafebooruService
 {
-    protected string $apiUrl = 'https://safebooru.org/index.php?page=dapi&s=post&q=index&limit=100'; // Наприклад, обмежимо до 100 записів
+    protected string $apiUrl = 'https://safebooru.org/index.php?page=dapi&s=post&q=index&limit=100';
 
-    public function fetchAndStoreArtworks(int $maxImages = 10) // Додаємо параметр для обмеження
+    public function fetchAndStoreArtworks(int $maxImages = 10)
     {
         try {
             $response = Http::get($this->apiUrl);
@@ -30,10 +30,15 @@ class SafebooruService
 
             foreach ($xml->post as $post) {
                 if ($count >= $maxImages) {
-                    break; // Зупиняємо, якщо досягли ліміту
+                    break;
                 }
 
-                $this->storeArtwork($post);
+                try {
+                    $this->storeArtwork($post);
+                } catch (\Exception $e) {
+                    Log::error('Помилка обробки artwork: ' . $e->getMessage());
+                }
+
                 $count++;
             }
         } catch (\Exception $e) {
@@ -49,28 +54,31 @@ class SafebooruService
         foreach ($tags as $tagName) {
             if (empty($tagName)) continue;
 
-            $existingTag = Tag::where('name', $tagName)->first();
+            try {
+                $existingTag = Tag::where('name', $tagName)->first();
 
-            if ($existingTag) {
-                $tagIds[] = $existingTag->id;
-            } else {
-                $slug = $this->generateUniqueSlug($tagName);
+                if ($existingTag) {
+                    $tagIds[] = $existingTag->id;
+                } else {
+                    $slug = $this->generateUniqueSlug($tagName);
 
-                $tag = Tag::create([
-                    'id' => (string) Str::ulid(),
-                    'name' => $tagName,
-                    'slug' => $slug,
-                    'meta_title' => ucfirst($tagName),
-                    'meta_description' => 'Tag description for ' . $tagName,
-                ]);
+                    $tag = Tag::create([
+                        'id' => (string) Str::ulid(),
+                        'name' => $tagName,
+                        'slug' => $slug,
+                        'meta_title' => ucfirst($tagName),
+                        'meta_description' => 'Tag description for ' . $tagName,
+                    ]);
 
-                $tagIds[] = $tag->id;
+                    $tagIds[] = $tag->id;
+                }
+            } catch (\Exception $e) {
+                Log::error('Помилка обробки тегу ' . $tagName . ': ' . $e->getMessage());
             }
         }
 
         return $tagIds;
     }
-
 
     protected function storeArtwork($post)
     {
@@ -80,34 +88,38 @@ class SafebooruService
             return;
         }
 
-        $tagIds = $this->storeTags((string) $post['tags']);
-        $userId = User::where('role', 'admin')->value('id') ?? null;
+        try {
+            $tagIds = $this->storeTags((string) $post['tags']);
+            $userId = User::where('role', 'admin')->value('id') ?? null;
 
-        $artwork = new Artwork([
-            'id' => (string) Str::ulid(),
-            'md5' => $md5,
-            'rating' => $this->mapRating((string) $post['rating']),
-            'width' => (int) $post['width'],
-            'height' => (int) $post['height'],
-            'file_ext' => pathinfo((string) $post['file_url'], PATHINFO_EXTENSION),
-            'file_size' => 0,
-            'thumbnail' => (string) $post['preview_url'],
-            'original' => (string) $post['file_url'],
-            'is_vip' => false,
-            'colors' => json_encode($this->extractColors((string) $post['file_url'])),
-            'source' => (string) $post['source'],
-            'is_published' => true,
-            'slug' => $this->generateUniqueSlug('artwork-' . $md5),
-            'meta_title' => 'Artwork ' . $md5,
-            'meta_description' => 'An artwork from Safebooru',
-            'image' => (string) $post['sample_url'],
-            'image_alt' => 'Image from Safebooru',
-            'user_id' => $userId,
-            'type' => 'image',
-        ]);
+            $artwork = new Artwork([
+                'id' => (string) Str::ulid(),
+                'md5' => $md5,
+                'rating' => $this->mapRating((string) $post['rating']),
+                'width' => (int) $post['width'],
+                'height' => (int) $post['height'],
+                'file_ext' => pathinfo((string) $post['file_url'], PATHINFO_EXTENSION),
+                'file_size' => 0,
+                'thumbnail' => (string) $post['preview_url'],
+                'original' => (string) $post['file_url'],
+                'is_vip' => false,
+                'colors' => json_encode($this->extractColors((string) $post['file_url'])),
+                'source' => (string) $post['source'],
+                'is_published' => true,
+                'slug' => $this->generateUniqueSlug('artwork-' . $md5),
+                'meta_title' => 'Artwork ' . $md5,
+                'meta_description' => 'An artwork from Safebooru',
+                'image' => (string) $post['sample_url'],
+                'image_alt' => 'Image from Safebooru',
+                'user_id' => $userId,
+                'type' => 'image',
+            ]);
 
-        $artwork->save();
-        $artwork->tags()->attach($tagIds);
+            $artwork->save();
+            $artwork->tags()->attach($tagIds);
+        } catch (\Exception $e) {
+            Log::error('Помилка збереження artwork ' . $md5 . ': ' . $e->getMessage());
+        }
     }
 
     protected function extractColors($imageUrl)
@@ -137,7 +149,7 @@ class SafebooruService
             $slug = Str::slug($baseSlug) . '-' . $count;
             $count++;
         }
-        while (Tag::where('slug', $slug)->exists()) { // Перевіряємо в `tags`
+        while (Tag::where('slug', $slug)->exists()) {
             $slug = Str::slug($baseSlug) . '-' . $count;
             $count++;
         }
