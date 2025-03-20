@@ -52,6 +52,6 @@ class Tag extends Model
 
     public function artworks()
     {
-        return $this->belongsToMany(Artwork::class, 'artwork_tag');
+        return $this->belongsToMany(Artwork::class, 'artwork_tag', 'tag_id', 'artwork_id');
     }
 }

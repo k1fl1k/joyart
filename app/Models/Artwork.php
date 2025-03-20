@@ -34,11 +34,16 @@ class Artwork extends Model
 
     public function tags()
     {
-        return $this->belongsToMany(Tag::class, 'artwork_tag');
+        return $this->belongsToMany(Tag::class, 'artwork_tag', 'artwork_id', 'tag_id');
     }
 
     public function favorites()
     {
         return $this->hasMany(Favorites::class, 'artwork_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }
