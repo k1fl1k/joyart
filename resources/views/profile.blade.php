@@ -36,7 +36,7 @@
                         <div id="user-posts">
                             @forelse($userPosts as $post)
                                 <div class="post-card">
-                                    <img src="{{ asset($post->thumbnail) }}" alt="meta_title">
+                                    <img src="{{ asset($post->thumbnail) }}" alt="{{ $post->meta_title }}">
                                 </div>
                             @empty
                                 <p>No posts yet.</p>
@@ -48,8 +48,7 @@
                         <div id="liked-posts" style="display: none;">
                             @forelse($likedPosts as $post)
                                 <div class="post-card">
-                                    <img src="{{ asset($post->thumbnail) }}" alt="Post Thumbnail">
-                                    <p>{{ $post->meta_title }}</p>
+                                    <img src="{{ asset($post->thumbnail) }}" alt="{{ $post->meta_title }}">
                                 </div>
                             @empty
                                 <p>No liked posts yet.</p>

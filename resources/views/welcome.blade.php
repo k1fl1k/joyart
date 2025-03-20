@@ -28,7 +28,9 @@
                 <div class="gallery">
                     @foreach ($images as $image)
                         <div class="gallery-item">
-                            <img src="{{ $image->thumbnail }}" alt="{{ $image->title }}" loading="lazy" class="gallery-image" />
+                            <a  href="{{ route('artwork.show', $image->slug) }}">
+                                <img src="{{ $image->thumbnail }}" alt="{{ $image->title }}" loading="lazy" class="gallery-image" />
+                            </a>
                             <p>{{ $image->title }}</p>
                         </div>
                     @endforeach

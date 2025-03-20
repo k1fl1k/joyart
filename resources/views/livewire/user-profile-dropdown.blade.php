@@ -24,6 +24,20 @@ new class extends Component {
 };
 ?>
 
+<script>
+    document.addEventListener("livewire:navigated", () => {
+        initDropdowns();
+    });
+
+    function initDropdowns() {
+        document.querySelectorAll("[data-dropdown]").forEach(dropdown => {
+            dropdown.addEventListener("click", function () {
+                this.classList.toggle("open");
+            });
+        });
+    }
+</script>
+
 <div class="hidden sm:flex sm:items-center sm:ms-6">
     @if ($user)
         <div class="profile-circle">

@@ -249,6 +249,12 @@ body {
     user-select: none;
 }
 
+.full-artwork{
+    width: 100%;
+    margin-right: 40px;
+    margin-top: 20px;
+}
+
 .pagination {
     display: flex;
     justify-content: center;
@@ -431,3 +437,23 @@ body {
     transition: color 0.3s ease;
 }
 
+.tag-link {
+    text-decoration: none;
+    color: #888;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.tag-link:hover {
+    color:  #555;
+}
+
+.subtag {
+    display: block;
+    margin-left: 10px;
+    color: #555;
+}
+
+.subtag:hover {
+    color: #333;
+}
