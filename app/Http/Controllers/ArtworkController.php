@@ -5,6 +5,7 @@ namespace k1fl1k\joyart\Http\Controllers;
 use k1fl1k\joyart\Models\Artwork;
 use k1fl1k\joyart\Http\Requests\StoreArtworkRequest;
 use k1fl1k\joyart\Http\Requests\UpdateArtworkRequest;
+use k1fl1k\joyart\Models\Tag;
 
 class ArtworkController extends Controller
 {
@@ -32,13 +33,14 @@ class ArtworkController extends Controller
         //
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Artwork $artwork)
     {
-        //
+        $tags = Tag::with('subtags')->get();
+        $user = $artwork->user; // Отримуємо автора
+
+        return view('artwork', compact('artwork', 'tags', 'user'));
     }
+
 
     /**
      * Show the form for editing the specified resource.
