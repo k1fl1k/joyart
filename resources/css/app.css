@@ -278,22 +278,21 @@ body {
 }
 
 .x-dropdown-content {
-    display: none;
-    position: absolute;
-    right: 0;
-    background-color: #222627;
-    min-width: 160px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    background-color: #333; /* Темно-сірий фон */
+    color: #ffffff; /* Білий текст */
     border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    min-width: 160px;
     z-index: 1000;
 }
+
 
 .x-dropdown:hover .x-dropdown-content {
     display: block;
 }
 
 .x-dropdown-link {
-    color: #e0e0e0;
+    color: #ffffff; /* Білий текст */
     padding: 10px 16px;
     display: block;
     text-decoration: none;
@@ -301,9 +300,10 @@ body {
 }
 
 .x-dropdown-link:hover {
-    background-color: #2a2a2a;
-    color: #38a9f0;
+    background-color: #38a9f0; /* Блакитний фон при наведенні */
+    color: #ffffff;
 }
+
 
 .profile-container {
     width: 1300px;
@@ -340,6 +340,7 @@ body {
     gap: 15px;
     padding-bottom: 10px;
     border-bottom: 1px solid #333;
+    width: 1250px;
 }
 
 .profile-avatar {
@@ -457,3 +458,90 @@ body {
 .subtag:hover {
     color: #333;
 }
+
+/* Додаткові стилі для лайків та коментарів */
+/* Styles for Like Button and Comments Section */
+.artwork-actions {
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #1c1c1c;
+    border-radius: 12px;
+}
+
+.like-button {
+    background-color: #38a9f0;
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.like-button:hover {
+    background-color: #2a8cba;
+}
+
+.likes-count {
+    color: #bbbbbb;
+    font-size: 14px;
+    margin-left: 10px;
+}
+
+/* Comments Section */
+.comments-section {
+    margin-top: 20px;
+}
+
+.comment {
+    background-color: #333;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    width: 1200px;
+}
+
+.comment p {
+    color: #e0e0e0;
+}
+
+.comment .comment-meta {
+    font-size: 18px;
+    color: #888888;
+}
+
+/* Comment Form */
+.comment-form textarea {
+    width: 1200px;
+    padding: 10px;
+    background-color: #444;
+    border: 1px solid #555;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    outline: none;
+    resize: none;
+}
+
+.comment-form textarea:focus {
+    border-color: #38a9f0;
+    box-shadow: 0 0 4px rgba(56, 169, 240, 0.6);
+}
+
+.comment-submit-button {
+    margin-top: 10px;
+    background-color: #38a9f0;
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.comment-submit-button:hover {
+    background-color: #2a8cba;
+}
+
