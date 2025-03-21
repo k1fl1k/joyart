@@ -36,10 +36,12 @@ class ArtworkController extends Controller
     public function show(Artwork $artwork)
     {
         $tags = Tag::with('subtags')->get();
-        $user = $artwork->user; // Отримуємо автора
+        $user = $artwork->user; // Автор
+        $comments = $artwork->comments()->paginate(5);
 
-        return view('artwork', compact('artwork', 'tags', 'user'));
+        return view('artwork', compact('artwork', 'tags', 'user', 'comments'));
     }
+
 
 
     /**

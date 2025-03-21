@@ -2,65 +2,27 @@
 
 namespace k1fl1k\joyart\Http\Controllers;
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use k1fl1k\joyart\Models\Artwork;
 use k1fl1k\joyart\Models\Comments;
-use k1fl1k\joyart\Http\Requests\StoreCommentsRequest;
-use k1fl1k\joyart\Http\Requests\UpdateCommentsRequest;
 
 class CommentsController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function store(Request $request, Artwork $artwork)
     {
-        //
-    }
+        $request->validate([
+            'body' => 'required',
+        ]);
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+        Comments::create([
+            'id' => (string) Str::ulid(),
+            'user_id' => Auth::id(),
+            'artwork_id' => $artwork->id,
+            'body' => $request->body,
+        ]);
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreCommentsRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Comments $comments)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Comments $comments)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateCommentsRequest $request, Comments $comments)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Comments $comments)
-    {
-        //
+        return back();
     }
 }

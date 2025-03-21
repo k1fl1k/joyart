@@ -46,4 +46,17 @@ class Artwork extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function comments(){
+        return $this->hasMany(Comments::class, 'artwork_id');
+    }
+
+    public function likes(){
+        return $this->hasMany(Likes::class, 'artwork_id');
+    }
+
+    public function isLikedByUser($userId)
+    {
+        return $this->likes()->where('user_id', $userId)->exists();
+    }
 }
