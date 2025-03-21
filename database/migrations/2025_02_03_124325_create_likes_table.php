@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('likes', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->foreignUlid('artwork_id')->unique()->constrained('artworks')->onDelete('cascade');
-            $table->foreignUlid('user_id')->unique()->constrained('users')->onDelete('cascade');
+            $table->foreignUlid('artwork_id')->constrained('artworks')->onDelete('cascade');
+            $table->foreignUlid('user_id')->constrained('users')->onDelete('cascade');
             $table->enum('state', ['like', 'dislike']); // -1, 1
             $table->timestamps();
         });
