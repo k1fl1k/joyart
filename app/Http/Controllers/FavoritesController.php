@@ -2,65 +2,29 @@
 
 namespace k1fl1k\joyart\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use k1fl1k\joyart\Models\Artwork;
 use k1fl1k\joyart\Models\Favorites;
-use k1fl1k\joyart\Http\Requests\StoreFavoritesRequest;
-use k1fl1k\joyart\Http\Requests\UpdateFavoritesRequest;
 
 class FavoritesController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function toggle(Artwork $artwork)
     {
-        //
-    }
+        $userId = Auth::id();
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+        $favorites = Favorites::where('user_id', $userId)->where('artwork_id', $artwork->id)->first();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreFavoritesRequest $request)
-    {
-        //
-    }
+        if ($favorites) {
+            $favorites->delete();
+        } else {
+            Favorites::create([
+                'id' => (string) Str::ulid(),
+                'user_id' => $userId,
+                'artwork_id' => $artwork->id,
+            ]);
+        }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Favorites $favorites)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Favorites $favorites)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateFavoritesRequest $request, Favorites $favorites)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Favorites $favorites)
-    {
-        //
+        return back();
     }
 }
