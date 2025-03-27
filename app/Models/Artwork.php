@@ -59,4 +59,9 @@ class Artwork extends Model
     {
         return $this->likes()->where('user_id', $userId)->exists();
     }
+
+    public function isFavoritedByUser($userId)
+    {
+        return $this->favorites()->where('user_id', $userId)->exists();
+    }
 }
