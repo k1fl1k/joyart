@@ -49,6 +49,7 @@ body {
     font-size: 32px;
     font-weight: 700;
     color: #38a9f0;
+    user-select: none;
 }
 
 .register-form-group {
@@ -61,6 +62,7 @@ body {
     font-weight: 500;
     color: #e0e0e0;
     margin-bottom: 8px;
+    user-select: none;
 }
 
 .register-form-input {
@@ -72,6 +74,7 @@ body {
     color: white;
     font-size: 14px;
     outline: none;
+    user-select: none;
 }
 
 .register-form-input:focus {
@@ -95,6 +98,7 @@ body {
     border: none;
     cursor: pointer;
     transition: background-color 0.3s;
+    user-select: none;
 }
 
 .register-form-button:hover {
@@ -106,12 +110,14 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-top: 20px;
+    user-select: none;
 }
 
 .register-form-footer a {
     font-size: 14px;
     color: #38a9f0;
     text-decoration: none;
+    user-select: none;
 }
 
 .register-form-footer a:hover {
@@ -131,6 +137,7 @@ body {
     align-items: center;
     padding: 10px 20px;
     background-color: #1c1c1c;
+    user-select: none;
 }
 
 .logo {
@@ -234,6 +241,71 @@ body {
     border-radius: 12px;
 }
 
+.filter{
+    background: transparent;
+}
+
+.search-suggestions {
+    position: absolute;
+    background: #2a2a2a;
+    width: 100%;
+    z-index: 10;
+    padding: 8px;
+    max-height: 200px;
+    max-width: 500px;
+    overflow-y: auto;
+    display: none; /* За замовчуванням приховуємо */
+}
+
+.search-suggestions.visible {
+    display: block; /* Показуємо тільки коли є результати */
+}
+
+.user-posts, #liked-posts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 10px;
+}
+
+.post-card {
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    flex-shrink: 0; /* Запобігає зменшенню карток */
+}
+
+.gallery-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.add-post {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    font-weight: bold;
+    color: white;
+    background: rgba(255, 255, 255, 0.2);
+    text-decoration: none;
+}
+
+.add-post-card {
+    border: 2px dashed rgba(255, 255, 255, 0.5);
+}
+
+
+
 .gallery-item {
     width: calc(20% - 10px);
     box-sizing: border-box;
@@ -249,10 +321,12 @@ body {
     user-select: none;
 }
 
-.full-artwork{
-    width: 100%;
-    margin-right: 40px;
+.full-artwork {
+    margin: auto;
     margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .pagination {
@@ -314,6 +388,7 @@ body {
     border-radius: 12px;
     border: 1px solid #38a9f0;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    user-select: none;
 }
 
 /* Profile styles */
@@ -341,6 +416,7 @@ body {
     padding-bottom: 10px;
     border-bottom: 1px solid #333;
     width: 1250px;
+    user-select: none;
 }
 
 .profile-avatar {
@@ -438,6 +514,55 @@ body {
     transition: color 0.3s ease;
 }
 
+/* Стилі для кнопки редагування */
+
+
+/* Стилі для форми редагування опису */
+.profile-description form {
+    margin-top: 10px;
+}
+
+.profile-description textarea {
+    width: 100%;
+    padding: 10px;
+    background-color: #333;
+    border: 1px solid #555;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    outline: none;
+    resize: none;
+}
+
+.profile-description textarea:focus {
+    border-color: #38a9f0;
+    box-shadow: 0 0 4px rgba(56, 169, 240, 0.6);
+}
+
+/* Стилі для блоку опису користувача, коли форма для редагування не активна */
+.profile-description p {
+    font-size: 14px;
+    color: #e0e0e0;
+}
+
+/* Стили для блоку постів */
+.profile-posts {
+    background-color: #222627;
+    padding: 15px;
+    border-radius: 12px;
+    min-height: 120px;
+    position: relative;
+}
+
+.add-post{
+    background-color: #222627;
+    padding: 15px;
+    border-radius: 12px;
+    min-height: 200px;
+    width: 200px;
+    position: relative;
+}
+
 .tag-link {
     text-decoration: none;
     color: #888;
@@ -459,13 +584,23 @@ body {
     color: #333;
 }
 
-/* Додаткові стилі для лайків та коментарів */
 /* Styles for Like Button and Comments Section */
+
+.artwork-details {
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.1); /* Легка підкладка */
+    border-radius: 5px;
+    width: 1250px;
+    margin: auto;
+    margin-top: 20px;
+}
+
 .artwork-actions {
     margin-bottom: 20px;
     padding: 20px;
     background-color: #1c1c1c;
     border-radius: 12px;
+    user-select: none;
 }
 
 .like-button {
@@ -545,3 +680,24 @@ body {
     background-color: #2a8cba;
 }
 
+.create-post-container {
+    width: 1300px;
+    height: auto;
+    margin: auto;
+    padding: 20px;
+    background-color: #1c1c1c;
+    border-radius: 12px;
+    border: 1px solid #38a9f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    margin-top: 40px;
+    user-select: none;
+}
+
+.tag-suggestions{
+    background-color: #333; /* Темно-сірий фон */
+    color: #ffffff; /* Білий текст */
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    min-width: 160px;
+    z-index: 1000;
+}
