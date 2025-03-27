@@ -25,4 +25,21 @@ class CommentsController extends Controller
 
         return back();
     }
+
+    public function destroy(Artwork $artwork, Comments $comment)
+    {
+        // Перевіряємо, чи коментар належить вказаній роботі
+        if ($comment->artwork_id !== $artwork->id) {
+            return back()->with('error', 'Коментар не належить цій роботі.');
+        }
+
+        // Видалення доступне автору коментаря або адміну
+        if ($comment->user_id === Auth::id() || Auth::user()->isAdmin()) {
+            $comment->delete();
+            return back()->with('success', 'Коментар видалено.');
+        }
+
+        return back()->with('error', 'Ви не маєте прав для видалення цього коментаря.');
+    }
+
 }
