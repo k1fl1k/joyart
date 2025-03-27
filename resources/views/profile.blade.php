@@ -19,8 +19,22 @@
                     <!-- Опис користувача -->
                     <div class="profile-description">
                         <h3>Description</h3>
-                        <p>{{ auth()->user()->description ?? 'No description available.' }}</p>
-                        <a class="profile-edit-icon">✎</a>
+                        <p>{{ auth()->user()->birthday ?? 'Unknown date.'}}</p>
+                        <p>{{ auth()->user()->gender ?? 'Unknown gender.'}}</p>
+                        @if( session('editing_description'))
+                            <form action="{{ route('profile.updateDescription') }}" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <textarea name="description" rows="4" class="w-full">{{ auth()->user()->description ?? '' }}</textarea>
+                                <button type="submit" class="profile-settings-btn">Save</button>
+                            </form>
+                        @else
+                            <p>{{ auth()->user()->description ?? 'No description available.' }}</p>
+                            <form action="{{ route('profile.startEditing') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="profile-edit-icon">✎</button>
+                            </form>
+                        @endif
                     </div>
 
                     <!-- Пости користувача / Лайкнуті пости -->
@@ -33,16 +47,23 @@
                         </div>
 
                         <!-- Пости користувача -->
-                        <div id="user-posts">
-                            @forelse($userPosts as $post)
-                                <div class="post-card">
-                                    <img src="{{ asset($post->thumbnail) }}" alt="{{ $post->meta_title }}">
+                        <div class="">
+                            <div class="user-posts">
+                                <div class="post-card add-post-card">
+                                    <a class="add-post gallery-image" href="{{ route('create.post') }}">+</a>
                                 </div>
-                            @empty
-                                <p>No posts yet.</p>
 
-                            @endforelse
+                                @foreach ($userPosts as $post)
+                                    <div class="post-card">
+                                        <a href="{{ route('artwork.show', $post->slug) }}">
+                                            <img src="{{ Str::startsWith($post->thumbnail, 'http') ? $post->thumbnail : asset($post->thumbnail) }}"
+                                                 alt="{{ $post->meta_title }}" class="gallery-image" loading="lazy">
+                                        </a>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
+
 
                         <!-- Лайкнуті пости -->
                         <div id="liked-posts" style="display: none;">
