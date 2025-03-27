@@ -64,4 +64,9 @@ class User extends Authenticatable
     {
         return $this->avatar ? asset('storage/avatars/' . $this->avatar) : asset('storage/avatars/default.png');
     }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin'; // Або інша логіка перевірки адміністратора
+    }
 }
