@@ -3,26 +3,29 @@
         <x-tags-sidebar :tags="$tags" />
         <div class="main">
             <div class="gallery">
-                <div class="profile-header">
-                    <div class="profile-circle">
-                        <img src="{{ $user->avatar ?? asset('storage/images/avatar-male.png') }}"
-                             alt="{{ $user->username }}'s Avatar">
-                    </div>
-                    <div>
-                        <h2>{{ $user->username }}</h2>
-                        <p class="text-gray-400">Role: {{ $user->role }}</p>
-                    </div>
+                <div class="profile-header flex items-center space-x-4">
+                    <a href="{{ route('profile.show', ['username' => $user->username]) }}" class="flex items-center space-x-3">
+                        <div class="profile-circle">
+                            <img src="{{ $user->avatar ?? asset('storage/images/avatar-male.png') }}"
+                                 alt="{{ $user->username }}'s Avatar" class="w-12 h-12 rounded-full">
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-semibold">{{ $user->username }}</h2>
+                            <p class="text-gray-400 text-sm">Role: {{ $user->role }}</p>
+                        </div>
+                    </a>
+                    @if (Auth::check() && Auth::id() === $artwork->user_id)
+                        <a href="{{ route('artworks.edit', $artwork->slug) }}" class="edit-button">Edit</a>
+                        <form action="{{ route('artworks.destroy', $artwork->slug) }}" method="POST" style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="delete-button">Delete</button>
+                        </form>
+                    @endif
                 </div>
                 @php
                     $colors = json_decode($artwork->colors, true) ?? [];
                 @endphp
-{{--                <div class="full-artwork"--}}
-{{--                     style="box-shadow: 0 4px 20px {{ $colors[0] ?? 'transparent' }};">--}}
-{{--                    <img src="{{ $artwork->original }}"--}}
-{{--                         alt="{{ $artwork->image_alt }}"--}}
-{{--                         loading="lazy"--}}
-{{--                         class="artwork-image" />--}}
-{{--                </div>--}}
                 @if(isset($artwork))
                     <div class="full-artwork"
                          style="box-shadow: 0 -10px 20px {{ $colors[0] ?? 'transparent' }},
