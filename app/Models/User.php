@@ -3,6 +3,7 @@
 namespace k1fl1k\joyart\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -10,7 +11,7 @@ use Illuminate\Notifications\Notifiable;
 use k1fl1k\joyart\Enums\Gender;
 use k1fl1k\joyart\Enums\Role;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
@@ -68,5 +69,15 @@ class User extends Authenticatable
     public function isAdmin()
     {
         return $this->role === 'admin'; // Або інша логіка перевірки адміністратора
+    }
+
+    public function favorites()
+    {
+        return $this->belongsToMany(Artwork::class, 'favorites', 'user_id', 'artwork_id');
+    }
+
+    public function artworks()
+    {
+        return $this->hasMany(Artwork::class);
     }
 }
