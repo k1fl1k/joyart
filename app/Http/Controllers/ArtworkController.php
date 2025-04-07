@@ -2,18 +2,18 @@
 
 namespace k1fl1k\joyart\Http\Controllers;
 
+use FFMpeg;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Intervention\Image\Image;
-use k1fl1k\joyart\Http\Requests\UpdateArtworkRequest;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 use k1fl1k\joyart\Models\Artwork;
 use k1fl1k\joyart\Models\Tag;
 use k1fl1k\joyart\Models\User;
 use League\ColorExtractor\ColorExtractor;
 use League\ColorExtractor\Palette;
-use FFMpeg;
 
 class ArtworkController extends Controller
 {
@@ -34,6 +34,7 @@ class ArtworkController extends Controller
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Validation failed', ['errors' => $e->errors()]);
+
             return back()->withErrors($e->errors());
         }
 
@@ -45,6 +46,7 @@ class ArtworkController extends Controller
 
             if (Artwork::where('md5', $md5)->exists()) {
                 Log::warning('Duplicate file detected.', ['md5' => $md5]);
+
                 return back()->withErrors(['original' => 'This file already exists.']);
             }
 
@@ -62,8 +64,8 @@ class ArtworkController extends Controller
             $slug = $this->generateUniqueSlug($validated['meta_title']);
             Log::info('Generated unique slug.', ['slug' => $slug]);
 
-            $thumbnailPath = $this->generateThumbnail($file, $extension);
-            Log::info('Thumbnail generated.', ['thumbnail_path' => $thumbnailPath]);
+            list($thumbnailPath, $width, $height) = $this->generateThumbnail($file, $extension);
+            Log::info('Thumbnail generated.', ['thumbnail_path' => $thumbnailPath, 'width' => $width, 'height' => $height]);
 
             $colors = $this->extractColors($filePath);
             Log::info('Extracted colors from image.', ['colors' => $colors]);
@@ -77,8 +79,8 @@ class ArtworkController extends Controller
                 'md5' => $md5,
                 'type' => $validated['type'],
                 'rating' => $validated['rating'],
-                'width' => 1920, // Заглушка, потрібно визначати
-                'height' => 1080, // Заглушка, потрібно визначати
+                'width' => $width, // Заглушка, потрібно визначати
+                'height' => $height, // Заглушка, потрібно визначати
                 'file_ext' => $extension,
                 'file_size' => $fileSize,
                 'thumbnail' => $thumbnailPath,
@@ -90,7 +92,7 @@ class ArtworkController extends Controller
                 'slug' => $slug,
                 'meta_title' => $validated['meta_title'],
                 'meta_description' => $validated['meta_description'],
-                'image' =>  $fileUrl,
+                'image' => $fileUrl,
                 'image_alt' => $validated['image_alt'] ?? null,
             ]);
 
@@ -105,10 +107,10 @@ class ArtworkController extends Controller
             return redirect()->route('welcome')->with('success', 'Artwork created successfully.');
         } catch (\Exception $e) {
             Log::error('Error saving artwork: '.$e->getMessage());
+
             return back()->withErrors(['error' => 'An error occurred while saving the artwork.']);
         }
     }
-
 
     protected function generateUniqueSlug($baseSlug)
     {
@@ -120,37 +122,72 @@ class ArtworkController extends Controller
         }
 
         Log::info('Final unique slug generated.', ['slug' => $slug]);
+
         return $slug;
     }
 
     protected function generateThumbnail($file, $extension)
     {
-        Log::info('Generating thumbnail for file.', ['extension' => $extension]);
+        Log::info('Generating thumbnail for file.', [
+            'extension' => $extension,
+            'filename' => $file->getClientOriginalName()
+        ]);
 
-        $thumbnailPath = public_path('thumbnails/');
-        $thumbnailFilename = 'thumbnail_' . $file->getClientOriginalName() . '.jpg';
+        try {
+            // Define thumbnail storage path and filename
+            $thumbnailDir = 'thumbnails';
+            $thumbnailFilename = 'thumb_' . time() . '_' . Str::random(8) . '.jpg';
+            $thumbnailPath = "$thumbnailDir/$thumbnailFilename";
 
-        if (in_array($extension, ['jpg', 'jpeg', 'png'])) {
-            $thumbnailImage = Image::make($file->getRealPath());
-            $thumbnailImage->resize(150, 150, function ($constraint) {
-                $constraint->aspectRatio();
-            });
-            $thumbnailImage->save($thumbnailPath . $thumbnailFilename);
-        } elseif (in_array($extension, ['gif', 'mp4', 'mov', 'avi'])) {
-            Log::info('1');
-            $ffmpeg = FFMpeg\FFMpeg::create();
-            Log::info('2');
-            $video = $ffmpeg->open($file->getRealPath());
-            Log::info('3');
-            $frame = $video->frame(FFMpeg\Coordinate\TimeCode::fromSeconds(10));
-            Log::info('4');
-            $frame->save(storage_path('app/public/thumbnails/'.$thumbnailFilename));
-            Log::info('5');
+            // Initialize Intervention Image manager
+            $manager = new ImageManager(new Driver());
+            $width = 0;
+            $height = 0;
+
+            if (in_array(strtolower($extension), ['jpg', 'jpeg', 'png'])) {
+                // Handle static images
+                $image = $manager->read($file->getRealPath());
+                $width = $image->width();
+                $height = $image->height();
+                $image->resize(150, 150, function ($constraint) {
+                    $constraint->aspectRatio();
+                    $constraint->upsize();
+                });
+                Storage::disk('public')->put($thumbnailPath, $image->toJpeg(75));
+
+            }  elseif (in_array($extension, ['gif', 'mp4', 'mov', 'avi'])) {
+                $ffmpeg = FFMpeg\FFMpeg::create();
+                $video = $ffmpeg->open($file->getRealPath());
+                $frame = $video->frame(FFMpeg\Coordinate\TimeCode::fromSeconds(10));
+                $framePath = storage_path('app/public/thumbnails/' . $thumbnailFilename);
+                $frame->save($framePath);
+
+                $image = $manager->read($framePath);
+                $width = $image->width();
+                $height = $image->height();
+            } else {
+                throw new \Exception("Unsupported file extension: $extension");
+            }
+
+            $thumbnailUrl = Storage::disk('public')->url($thumbnailPath);
+
+            Log::info('Thumbnail generated successfully.', [
+                'path' => $thumbnailPath,
+                'url' => $thumbnailUrl,
+                'width' => $width,
+                'height' => $height
+            ]);
+
+            return [$thumbnailUrl, $width, $height];
+
+        } catch (\Exception $e) {
+            Log::error('Thumbnail generation failed.', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            throw new \Exception('Failed to generate thumbnail: ' . $e->getMessage());
         }
-
-        return '/storage/thumbnails/' . $thumbnailFilename;
     }
-
 
     protected function extractColors($filePath)
     {
@@ -160,9 +197,11 @@ class ArtworkController extends Controller
             $colors = array_map(fn ($color) => sprintf('#%06X', $color), $extractor->extract(4));
 
             Log::info('Extracted colors from image.', ['colors' => $colors]);
+
             return $colors;
         } catch (\Exception $e) {
             Log::error('Error extracting colors: '.$e->getMessage());
+
             return [];
         }
     }
@@ -194,6 +233,7 @@ class ArtworkController extends Controller
         }
 
         Log::info('Tags stored successfully.', ['tag_ids' => $tagIds]);
+
         return $tagIds;
     }
 
@@ -210,16 +250,58 @@ class ArtworkController extends Controller
 
     public function edit(Artwork $artwork)
     {
-        Log::info('Opening artwork edit form.', ['artwork_id' => $artwork->id]);
+        if (auth()->id() !== $artwork->user_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        return view('artwork.edit', compact('artwork'));
     }
 
-    public function update(UpdateArtworkRequest $request, Artwork $artwork)
+    public function update(Request $request, Artwork $artwork)
     {
-        Log::info('Updating artwork.', ['artwork_id' => $artwork->id]);
+        $request->validate([
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string',
+            'image_alt' => 'nullable|string|max:255',
+            'tags' => 'nullable|string', // Приймаємо теги у вигляді рядка
+        ]);
+
+        // Оновлення даних
+        $artwork->update([
+            'meta_title' => $request->meta_title,
+            'meta_description' => $request->meta_description,
+            'image_alt' => $request->image_alt,
+            'is_published' => $request->has('is_published'),
+        ]);
+
+        // Оновлення тегів
+        if (! empty($request->tags)) {
+            $tagNames = explode(',', $request->tags);
+
+            $tags = collect($tagNames)->map(function ($tag) {
+                return Tag::firstOrCreate(
+                    ['name' => trim($tag)],
+                    [
+                        'id' => (string) Str::ulid(), // Генеруємо ULID для нових тегів
+                        'slug' => Str::slug($tag),
+                        'meta_title' => ucfirst($tag),
+                        'meta_description' => 'Tag description for '.$tag,
+                    ]
+                );
+            });
+
+            $artwork->tags()->sync($tags->pluck('id'));
+        } else {
+            $artwork->tags()->detach();
+        }
+
+        return redirect()->route('artwork.show', $artwork->slug)->with('success', 'Artwork updated successfully!');
     }
 
     public function destroy(Artwork $artwork)
     {
-        Log::info('Deleting artwork.', ['artwork_id' => $artwork->id]);
+        $artwork->delete();
+
+        return redirect()->route('welcome')->with('success', 'Artwork deleted successfully.');
     }
 }
