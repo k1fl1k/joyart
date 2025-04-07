@@ -68,7 +68,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isAdmin()
     {
-        return $this->role === 'admin'; // Або інша логіка перевірки адміністратора
+        return $this->role === 'admin';
     }
 
     public function favorites()
