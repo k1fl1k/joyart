@@ -62,6 +62,11 @@
                     <label for="tags" class="register-form-label">Tags</label>
                     <div class="border p-2 rounded-lg">
                         <div id="selected-tags" class="flex flex-wrap gap-2 mb-2"></div>
+                        <div id="selected-tags" class="flex flex-wrap gap-2 mb-2">
+
+
+                        </div>
+
                         <input type="text" id="tag-input" class="register-form-input" placeholder="Type a tag and press Enter">
                         <input type="hidden" name="tags" id="hidden-tags">
                         <div id="tag-suggestions" class="tag-suggestions"></div>
