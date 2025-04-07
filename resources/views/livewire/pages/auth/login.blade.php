@@ -20,6 +20,8 @@ new #[Layout('layouts.guest')] class extends Component
 
         Session::regenerate();
 
+        if($this)
+
         $this->redirectIntended(default: route('welcome', absolute: false), navigate: true);
     }
 }; ?>
