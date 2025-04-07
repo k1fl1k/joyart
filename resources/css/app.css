@@ -264,23 +264,50 @@ body {
 .user-posts, #liked-posts {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    margin-left: 20px;
+    gap: 80px;
     max-width: 100%;
-    overflow-x: auto;
-    white-space: nowrap;
+    max-height: 370px; /* Обмежуємо максимальну висоту */
+    overflow-y: auto; /* Додаємо скрол тільки якщо треба */
+    overflow-x: hidden;
     padding-bottom: 10px;
 }
 
+/* Додаємо скроллбар */
+.user-posts::-webkit-scrollbar,
+#liked-posts::-webkit-scrollbar {
+    width: 8px;
+}
+
+.user-posts::-webkit-scrollbar-thumb,
+#liked-posts::-webkit-scrollbar-thumb {
+    background-color: #38a9f0;
+    border-radius: 4px;
+}
+
+.user-posts::-webkit-scrollbar-track,
+#liked-posts::-webkit-scrollbar-track {
+    background: #1c1c1c;
+}
+
 .post-card {
-    width: 200px;
-    height: 200px;
+    width: 220px;
+    height: 220px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.1);
     overflow: hidden;
-    flex-shrink: 0; /* Запобігає зменшенню карток */
+    flex-shrink: 0;
+}
+
+.settings{
+    position: relative;
+    left: 990px;
+    padding: 5px;
+    min-width: 200px;
+    user-select: none;
 }
 
 .gallery-image {
@@ -327,6 +354,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 95%;
 }
 
 .pagination {
@@ -459,6 +487,7 @@ body {
     border-radius: 12px;
     min-height: 120px;
     position: relative;
+    max-width: 650px;
 }
 
 .profile-description h3, .profile-posts h3 {
@@ -550,7 +579,7 @@ body {
     background-color: #222627;
     padding: 15px;
     border-radius: 12px;
-    min-height: 120px;
+    height: 550px;
     position: relative;
 }
 
