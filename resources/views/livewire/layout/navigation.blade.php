@@ -1,10 +1,12 @@
 <?php
 
 use k1fl1k\joyart\Livewire\Actions\Logout;
+use k1fl1k\joyart\Models\Tag;
 use Livewire\Volt\Component;
 
-new class extends Component
-{
+new class extends Component {
+    public $tags;
+
     /**
      * Log the current user out of the application.
      */
@@ -14,16 +16,14 @@ new class extends Component
 
         $this->redirect('/', navigate: true);
     }
+
+    public function mount()
+    {
+        // Завантажуємо теги
+        $this->tags = Tag::whereNull('parent_id')->with('subtags')->get();
+    }
 }; ?>
 
 <nav x-data="{ open: false }" class="">
-    <div class="header">
-        <div class="logo"><a href="/">joyhub</a></div>
-        <div class="search-bar">
-            <input type="text" placeholder="Search" />
-        </div>
-        <div class="user-profile">
-            @livewire('user-profile-dropdown')
-        </div>
-    </div>
+    <x-header :tags="$tags"/>
 </nav>
