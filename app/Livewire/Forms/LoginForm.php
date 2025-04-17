@@ -3,6 +3,7 @@
 namespace k1fl1k\joyart\Livewire\Forms;
 
 use Illuminate\Auth\Events\Lockout;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
@@ -43,7 +44,21 @@ class LoginForm extends Form
         }
 
         RateLimiter::clear($this->throttleKey());
+
+        $user = Auth::user();
+
+        if ($user instanceof MustVerifyEmail && ! $user->hasVerifiedEmail()) {
+            $user->sendEmailVerificationNotification();
+
+            session()->flash('status', __('A verification link has been sent to your email address.'));
+
+            // перенаправлення через виняток
+            throw ValidationException::withMessages([
+                'email' => __('You must verify your email address before logging in.'),
+            ])->redirectTo(route('verification.notice'));
+        }
     }
+
 
     private function ensureIsNotRateLimited(): void
     {

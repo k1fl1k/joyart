@@ -7,7 +7,7 @@ use k1fl1k\joyart\Services\SafebooruService;
 
 class FetchSafebooruCommand extends Command
 {
-    protected $signature = 'fetch:safebooru {limit=100}'; // Додаємо параметр ліміту з дефолтним значенням 10
+    protected $signature = 'fetch:safebooru {count} {userId}';// Додаємо параметр ліміту з дефолтним значенням 10
     protected $description = 'Отримати та зберегти зображення з Safebooru API';
 
     public function __construct(protected SafebooruService $safebooruService)
@@ -17,10 +17,13 @@ class FetchSafebooruCommand extends Command
 
     public function handle()
     {
-        $limit = (int) $this->argument('limit'); // Отримуємо переданий параметр
-        $this->info("Отримання {$limit} зображень з Safebooru API...");
-        $this->safebooruService->fetchAndStoreArtworks($limit);
-        $this->info("Дані успішно отримані та збережені!");
+        $count = (int) $this->argument('count');
+        $userId = (string) $this->argument('userId');
+
+        $safebooruService = new SafebooruService();
+        $safebooruService->fetchAndStoreArtworks($count, $userId);
+
+        $this->info("{$count} artworks have been fetched and stored for user ID: {$userId}");
     }
 }
 
