@@ -44,17 +44,17 @@
                 </div>
 
                 <div class="register-form-group">
-                    <label for="meta_title" class="register-form-label">Meta Title</label>
+                    <label for="meta_title" class="register-form-label">Title</label>
                     <input type="text" name="meta_title" id="meta_title" class="register-form-input">
                 </div>
 
                 <div class="register-form-group">
-                    <label for="meta_description" class="register-form-label">Meta Description</label>
+                    <label for="meta_description" class="register-form-label">Description</label>
                     <textarea name="meta_description" id="meta_description" class="register-form-input"></textarea>
                 </div>
 
                 <div class="register-form-group">
-                    <label for="image_alt" class="register-form-label">Image Alt</label>
+                    <label for="image_alt" class="register-form-label">Alt name</label>
                     <input type="text" name="image_alt" id="image_alt" class="register-form-input">
                 </div>
 

@@ -27,9 +27,7 @@
                     $colors = json_decode($artwork->colors, true) ?? [];
                 @endphp
                 @if(isset($artwork))
-                    <div class="full-artwork"
-                         style="box-shadow: 0 -10px 20px {{ $colors[0] ?? 'transparent' }},
-                0 10px 20px {{ $colors[1] ?? 'transparent' }};">
+                    <div class="full-artwork">
                         @php
                             $isVideo = isset($artwork->original) && preg_match('/\.(mp4|webm|ogg)$/i', $artwork->original);
                         @endphp
@@ -43,7 +41,9 @@
                             <img src="{{ Str::startsWith($artwork->original, 'http') ? $artwork->original : asset($artwork->original) }}"
                                  alt="{{ $artwork->image_alt }}"
                                  loading="lazy"
-                                 class="artwork-image" />
+                                 class="artwork-image"
+                                 style="box-shadow: 0 -10px 20px {{ $colors[0] ?? 'transparent' }},
+                                 0 10px 20px {{ $colors[1] ?? 'transparent' }};"/>
                         @endif
                     </div>
                     <div class="artwork-details">

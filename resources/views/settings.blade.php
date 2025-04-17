@@ -7,6 +7,12 @@
                 <!-- Форма оновлення інформації -->
                 <livewire:profile.update-profile-information-form />
 
+                <!-- Форма оновлення дати народження -->
+                <livewire:profile.update-birthday-form />
+
+                <!-- Форма оновлення аватарки -->
+                <livewire:profile.update-avatar-form />
+
                 <!-- Форма оновлення пароля -->
                 <livewire:profile.update-password-form />
             </div>
