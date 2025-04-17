@@ -7,16 +7,6 @@ use Livewire\Volt\Component;
 new class extends Component {
     public $tags;
 
-    /**
-     * Log the current user out of the application.
-     */
-    public function logout(Logout $logout): void
-    {
-        $logout();
-
-        $this->redirect('/', navigate: true);
-    }
-
     public function mount()
     {
         // Завантажуємо теги
