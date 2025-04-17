@@ -18,17 +18,15 @@
     document.addEventListener('DOMContentLoaded', function () {
         const searchInput = document.getElementById('searchInput');
         const searchForm = document.getElementById('searchForm');
+        const suggestionsContainer = document.getElementById('search-suggestions'); // <-- ось так
         const filterDropdown = document.getElementById('filterDropdown');
 
-        // Function to handle search form submission
         function triggerSearch() {
             searchForm.submit();
         }
 
-        // Handle search suggestions (no changes needed here)
         searchInput.addEventListener('input', async function () {
             const query = searchInput.value.trim();
-            const suggestionsContainer = document.getElementById('search-suggestions');
 
             if (query.length > 1) {
                 try {
@@ -36,10 +34,8 @@
                     if (!response.ok) throw new Error('Network response was not ok');
                     const tags = await response.json();
 
-                    // Clear previous suggestions
                     suggestionsContainer.innerHTML = '';
 
-                    // Display search suggestions if available
                     if (tags.length > 0) {
                         suggestionsContainer.classList.add('visible');
                         tags.forEach(tag => {
@@ -65,7 +61,6 @@
             }
         });
 
-        // Hide search suggestions when clicking outside the input
         document.addEventListener('click', function (event) {
             if (!searchInput.contains(event.target) && !suggestionsContainer.contains(event.target)) {
                 suggestionsContainer.classList.remove('visible');
