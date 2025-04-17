@@ -1,7 +1,9 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use k1fl1k\joyart\Http\Controllers\AdminController;
 use k1fl1k\joyart\Http\Controllers\ArtworkController;
 use k1fl1k\joyart\Http\Controllers\CommentsController;
 use k1fl1k\joyart\Http\Controllers\FavoritesController;
@@ -72,5 +74,19 @@ Route::put('/artworks/{artwork:slug}/edited', [ArtworkController::class, 'update
     ->middleware(['auth'])
     ->name('artworks.update');
 
+Route::post('/logout', function () {
+    Auth::logout();
+    return redirect('/');
+})->name('logout');
+
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin', [AdminController::class, 'index'])->name('admin.panel');
+    Route::post('/admin/users', [AdminController::class, 'updateUser'])->name('admin.updateUser');
+    Route::post('/admin/fetch', [AdminController::class, 'fetchSafebooru'])->name('admin.fetchSafebooru');
+    Route::get('/admin/user-search', [AdminController::class, 'searchUser'])->name('admin.userSearch');
+    Route::get('/admin/user-info/{id}', [AdminController::class, 'getUserInfo'])->name('admin.userInfo');
+
+});
 
 require __DIR__.'/auth.php';
