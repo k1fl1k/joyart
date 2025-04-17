@@ -15,7 +15,8 @@ class SafebooruService
 {
     protected string $apiUrl = 'https://safebooru.org/index.php?page=dapi&s=post&q=index&limit=100';
 
-    public function fetchAndStoreArtworks(int $maxImages = 10)
+    // Додати параметр $userId до методу
+    public function fetchAndStoreArtworks(int $maxImages = 10, string $userId)
     {
         try {
             $response = Http::get($this->apiUrl);
@@ -34,7 +35,8 @@ class SafebooruService
                 }
 
                 try {
-                    $this->storeArtwork($post);
+                    // Передаємо $userId для збереження артворку
+                    $this->storeArtwork($post, $userId);
                 } catch (\Exception $e) {
                     Log::error('Помилка обробки artwork: ' . $e->getMessage());
                 }
@@ -80,7 +82,9 @@ class SafebooruService
         return $tagIds;
     }
 
-    protected function storeArtwork($post)
+
+// Оновлений метод storeArtwork, щоб зберігати артворки для конкретного користувача
+    protected function storeArtwork($post, $userId)
     {
         $md5 = (string) $post['md5'];
 
@@ -90,7 +94,6 @@ class SafebooruService
 
         try {
             $tagIds = $this->storeTags((string) $post['tags']);
-            $userId = User::where('role', 'admin')->value('id') ?? null;
 
             $artwork = new Artwork([
                 'id' => (string) Str::ulid(),
@@ -111,7 +114,7 @@ class SafebooruService
                 'meta_description' => 'An artwork from Safebooru',
                 'image' => (string) $post['sample_url'],
                 'image_alt' => 'Image from Safebooru',
-                'user_id' => $userId,
+                'user_id' => $userId, // Зберігаємо ID користувача, який завантажив артворк
                 'type' => 'image',
             ]);
 
