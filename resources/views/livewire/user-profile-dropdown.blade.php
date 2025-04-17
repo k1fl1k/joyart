@@ -12,15 +12,6 @@ new class extends Component {
     {
         $this->user = Auth::user();
     }
-
-    /**
-     * Log the current user out of the application.
-     */
-    public function logout(Logout $logout): void
-    {
-        $logout();
-        $this->redirect('/', navigate: true);
-    }
 };
 ?>
 
@@ -71,12 +62,20 @@ new class extends Component {
                     {{ __('Profile') }}
                 </x-dropdown-link>
 
-                <!-- Authentication -->
-                <button wire:click="logout" class="w-full text-start">
-                    <x-dropdown-link>
-                        {{ __('Log Out') }}
+                @if(Auth::user()->role == \k1fl1k\joyart\Enums\Role::ADMIN)
+                    <x-dropdown-link :href="route('admin.panel')" wire:navigate>
+                        {{ __('Admin panel') }}
                     </x-dropdown-link>
-                </button>
+                @endif
+                <!-- Authentication -->
+                <x-dropdown-link>
+                    <form method="POST" action="{{ route('logout') }}" x-data>
+                        @csrf
+                        <button type="submit" class="w-full text-left">
+                            {{ __('Log Out') }}
+                        </button>
+                    </form>
+                </x-dropdown-link>
             @else
                 <x-dropdown-link :href="route('login')" wire:navigate>
                     {{ __('Log In') }}
