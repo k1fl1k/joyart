@@ -2,12 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Base styles */
+:root {
+    --header-height: 60px;
+}
+
 body {
     font-family: 'Kodchasan', sans-serif;
     background: linear-gradient(to bottom, #5995c5, #121212);
     background-attachment: fixed;
-    height: 100vh;
+    min-height: 100vh;
     color: #ffffff;
+    overflow-x: hidden;
 }
 
 .bg-gray-900 {
@@ -33,15 +39,22 @@ body {
     align-items: center;
     min-height: 100vh;
     background-color: #1c1c1c;
+    padding: 20px;
 }
 
 .register-form-wrapper {
     width: 100%;
     max-width: 400px;
     background-color: #222627;
-    padding: 32px;
+    padding: 20px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 576px) {
+    .register-form-wrapper {
+        padding: 15px;
+    }
 }
 
 .register-form-header {
@@ -128,72 +141,242 @@ body {
 .dashboard {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    min-height: 100vh;
 }
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
+    padding: 0 20px;
     background-color: #1c1c1c;
     user-select: none;
+    height: var(--header-height);
+    box-sizing: border-box;
+    overflow: visible;
+    position: relative;
+}
+
+/* Mobile menu button */
+.mobile-menu-button {
+    display: none;
+    background: none;
+    border: none;
+    color: #38a9f0;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.mobile-menu-button:hover {
+    background-color: rgba(56, 169, 240, 0.1);
+    transform: scale(1.1);
+}
+
+/* Mobile menu */
+.mobile-menu {
+    display: none;
+    width: 100%;
+    background-color: #1c1c1c;
+    padding: 15px;
+    border-top: 1px solid #333;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.mobile-menu.active {
+    display: block;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.mobile-nav {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mobile-nav-link {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: #222627;
+    border-radius: 8px;
+    color: #ffffff;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.mobile-nav-link:hover {
+    background-color: #38a9f0;
+    transform: translateY(-2px);
+}
+
+.mobile-nav-icon {
+    margin-right: 10px;
+    font-size: 18px;
+}
+
+.mobile-nav-button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
 }
 
 .logo {
-    font-size: 34px;
+    font-size: 28px;
     font-weight: 700;
     color: #38a9f0;
-    margin-left: 15px;
     user-select: none;
+    white-space: nowrap;
+    flex: 0 0 auto;
+}
+
+.logo a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.search-bar {
+    flex: 1;
+    max-width: 400px;
+    position: relative;
+    margin: 0 20px;
 }
 
 .search-bar input {
-    width: 500px;
-    padding-left: 30px;
+    width: 100%;
+    padding: 8px 40px 8px 15px;
+    border-radius: 20px;
+    border: none;
+    color: #999999;
+    background: #222627;
+    height: 36px;
+    box-sizing: border-box;
+}
+
+.search-bar button {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #38a9f0;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0;
+    transition: all 0.3s ease;
+}
+
+.search-bar button:hover {
+    background-color: #2a8cba;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.mobile-search {
+    width: 100%;
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.mobile-search input {
+    width: 100%;
+    padding: 8px 15px;
     border-radius: 31px;
     border: none;
     color: #999999;
     background: #222627;
 }
 
+.mobile-search button {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #38a9f0;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0;
+    transition: all 0.3s ease;
+}
+
+.mobile-search button:hover {
+    background-color: #2a8cba;
+    transform: translateY(-50%) scale(1.1);
+}
+
 .user-profile {
     display: flex;
     align-items: center;
     gap: 10px;
+    flex: 0 0 auto;
 }
 
 .username {
-    font-size: 20px;
+    font-size: 16px;
     text-align: right;
-    margin-left: 10px;
+    margin-left: 5px;
     user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
 }
 
 .role {
     font-size: 12px;
     color: #999999;
     display: flex;
-    margin-left: 10px;
+    margin-left: 5px;
     user-select: none;
+    white-space: nowrap;
 }
 
 .content {
     display: flex;
     flex: 1;
+    flex-wrap: wrap;
 }
 
 .sidebar {
     width: 20%;
     padding: 20px;
     background: linear-gradient(to bottom, #2a2a2a, #1c1c1c);
-    margin-left: 80px;
+    margin-left: 0;
     margin-bottom: auto;
-    margin-top: 100px;
-    height: 2000px;
+    margin-top: 20px;
+    max-height: 80vh;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: #38a9f0 #1c1c1c;
+    transition: all 0.3s ease;
 }
 
 /* For Chrome, Edge */
@@ -222,23 +405,29 @@ body {
 }
 
 .main {
-    flex: 10;
-    padding-left: 40px;
-    padding-right: 40px;
-    padding-top: 100px;
+    flex: 1;
+    min-width: 0;
+    padding: 20px;
+    padding-top: 40px;
+    width: 100%;
 }
 
 /* Gallery Styles */
 .gallery {
     display: flex;
-    flex-wrap: wrap;
-    padding-top: 20px;
-    padding-bottom: 50px;
-    padding-left: 50px;
-    justify-content: space-between;
+    flex-direction: column;
+    padding: 20px;
     width: 100%;
     background-color: #1c1c1c;
     border-radius: 12px;
+}
+
+.gallery-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
 }
 
 .filter{
@@ -252,25 +441,31 @@ body {
     z-index: 10;
     padding: 8px;
     max-height: 200px;
-    max-width: 500px;
+    max-width: 100%;
     overflow-y: auto;
     display: none; /* За замовчуванням приховуємо */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    top: 100%;
+    margin-top: 5px;
 }
 
 .search-suggestions.visible {
     display: block; /* Показуємо тільки коли є результати */
+    animation: fadeIn 0.2s ease-in-out;
 }
 
 .user-posts, #liked-posts {
     display: flex;
     flex-wrap: wrap;
-    margin-left: 20px;
-    gap: 80px;
+    margin-left: 0;
+    gap: 20px;
     max-width: 100%;
     max-height: 370px; /* Обмежуємо максимальну висоту */
     overflow-y: auto; /* Додаємо скрол тільки якщо треба */
     overflow-x: hidden;
-    padding-bottom: 10px;
+    padding: 15px;
+    justify-content: center;
 }
 
 /* Додаємо скроллбар */
@@ -291,8 +486,8 @@ body {
 }
 
 .post-card {
-    width: 220px;
-    height: 220px;
+    width: 180px;
+    height: 180px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -300,13 +495,19 @@ body {
     background: rgba(255, 255, 255, 0.1);
     overflow: hidden;
     flex-shrink: 0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.post-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 }
 
 .settings{
-    position: relative;
-    left: 990px;
+    margin-left: auto;
     padding: 5px;
-    min-width: 200px;
+    min-width: 120px;
     user-select: none;
 }
 
@@ -334,17 +535,23 @@ body {
 
 
 .gallery-item {
-    width: calc(20% - 10px);
+    width: 220px;
     box-sizing: border-box;
     height: 220px;
-    margin-top: 30px;
+    margin-top: 10px;
     user-select: none;
+    transition: transform 0.3s ease;
+}
+
+.gallery-item:hover {
+    transform: scale(1.05);
 }
 
 .gallery-image {
     width: 100%;
-    height: 220px;
-    width: 220px;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
     user-select: none;
 }
 
@@ -361,16 +568,26 @@ body {
     display: flex;
     justify-content: center;
     margin-top: 20px;
+    flex-wrap: wrap;
+    gap: 5px;
 }
 .pagination .page-link {
     padding: 8px 12px;
-    margin: 0 5px;
+    margin: 0 2px;
     background: #f3f3f3;
     border-radius: 5px;
     text-decoration: none;
+    font-size: 14px;
 }
 .pagination .page-link:hover {
     background: #ddd;
+}
+
+@media (max-width: 576px) {
+    .pagination .page-link {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
 }
 
 /* Dropdown Styles */
@@ -408,8 +625,9 @@ body {
 
 
 .profile-container {
-    width: 1300px;
-    height: 800px;
+    width: 100%;
+    max-width: 1300px;
+    min-height: 800px;
     margin: auto;
     padding: 20px;
     background-color: #1c1c1c;
@@ -420,12 +638,19 @@ body {
 /* Profile styles */
 
 .profile-circle {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
     overflow: hidden;
     border-radius: 50%;
     background-color: #38a9f0;
     user-select: none;
+    border: 3px solid #38a9f0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.profile-circle:hover {
+    transform: scale(1.05);
 }
 
 .profile-circle img {
@@ -441,8 +666,10 @@ body {
     gap: 15px;
     padding-bottom: 10px;
     border-bottom: 1px solid #333;
-    width: 1250px;
+    width: 100%;
+    max-width: 1250px;
     user-select: none;
+    flex-wrap: wrap;
 }
 
 .profile-avatar {
@@ -473,7 +700,7 @@ body {
 /* Контейнер з описом та постами */
 .profile-content {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 20px;
     margin-top: 20px;
 }
@@ -485,7 +712,8 @@ body {
     border-radius: 12px;
     min-height: 120px;
     position: relative;
-    max-width: 650px;
+    width: 100%;
+    max-width: 100%;
 }
 
 .profile-description h3, .profile-posts h3 {
@@ -516,7 +744,7 @@ body {
 /* Кнопка налаштувань */
 .profile-settings-btn {
     display: inline-block;
-    margin-top: 20px;
+    margin-top: 10px;
     padding: 10px 20px;
     font-size: 14px;
     font-weight: 600;
@@ -524,11 +752,22 @@ body {
     background-color: #38a9f0;
     border-radius: 8px;
     text-align: center;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .profile-settings-btn:hover {
     background-color: #2a8cba;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.profile-settings-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .profile-toggle-button {
@@ -564,6 +803,189 @@ body {
 .profile-description textarea:focus {
     border-color: #38a9f0;
     box-shadow: 0 0 4px rgba(56, 169, 240, 0.6);
+}
+
+/* Стилі для сторінки налаштувань */
+.settings-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #1c1c1c;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Стилі для компонентів Livewire */
+.dark .text-gray-100 {
+    color: #38a9f0;
+}
+
+.dark .text-gray-400 {
+    color: #999;
+}
+
+.mt-1 {
+    margin-top: 0.25rem;
+}
+
+.mt-2 {
+    margin-top: 0.5rem;
+}
+
+.mt-6 {
+    margin-top: 1.5rem;
+}
+
+.space-y-6 > * + * {
+    margin-top: 1.5rem;
+}
+
+.block {
+    display: block;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.me-3 {
+    margin-right: 0.75rem;
+}
+
+/* Стилі для кнопок в формах */
+.text-input {
+    width: 100%;
+    padding: 10px;
+    background-color: #333;
+    border: 1px solid #555;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    outline: none;
+}
+
+.text-input:focus {
+    border-color: #38a9f0;
+    box-shadow: 0 0 4px rgba(56, 169, 240, 0.6);
+}
+
+.primary-button {
+    padding: 10px 20px;
+    background-color: #38a9f0;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.primary-button:hover {
+    background-color: #2a8cba;
+    transform: translateY(-2px);
+}
+
+.primary-button:active {
+    transform: translateY(0);
+}
+
+.flex {
+    display: flex;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.gap-4 {
+    gap: 1rem;
+}
+
+.settings-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #222627;
+    border-radius: 8px;
+    border-left: 3px solid #38a9f0;
+}
+
+.settings-section h2 {
+    color: #38a9f0;
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.settings-section p {
+    color: #999;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.settings-form-group {
+    margin-bottom: 15px;
+}
+
+.settings-label {
+    display: block;
+    font-size: 14px;
+    color: #e0e0e0;
+    margin-bottom: 8px;
+}
+
+.settings-input {
+    width: 100%;
+    padding: 10px;
+    background-color: #333;
+    border: 1px solid #555;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    outline: none;
+}
+
+.settings-input:focus {
+    border-color: #38a9f0;
+    box-shadow: 0 0 4px rgba(56, 169, 240, 0.6);
+}
+
+.settings-button {
+    padding: 10px 20px;
+    background-color: #38a9f0;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.settings-button:hover {
+    background-color: #2a8cba;
+    transform: translateY(-2px);
+}
+
+.settings-button:active {
+    transform: translateY(0);
+}
+
+.settings-message {
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.settings-message.success {
+    background-color: rgba(39, 174, 96, 0.2);
+    color: #2ecc71;
+}
+
+.settings-message.error {
+    background-color: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
 }
 
 /* Стилі для блоку опису користувача, коли форма для редагування не активна */
@@ -617,7 +1039,8 @@ body {
     padding: 10px;
     background: rgba(255, 255, 255, 0.1); /* Легка підкладка */
     border-radius: 5px;
-    width: 1250px;
+    width: 100%;
+    max-width: 1250px;
     margin: auto;
     margin-top: 20px;
 }
@@ -661,7 +1084,8 @@ body {
     padding: 10px;
     border-radius: 8px;
     margin-bottom: 10px;
-    width: 1200px;
+    width: 100%;
+    max-width: 1200px;
 }
 
 .comment p {
@@ -675,7 +1099,8 @@ body {
 
 /* Comment Form */
 .comment-form textarea {
-    width: 1200px;
+    width: 100%;
+    max-width: 1200px;
     padding: 10px;
     background-color: #444;
     border: 1px solid #555;
@@ -708,7 +1133,8 @@ body {
 }
 
 .create-post-container {
-    width: 1300px;
+    width: 100%;
+    max-width: 1300px;
     height: auto;
     margin: auto;
     padding: 20px;
@@ -810,11 +1236,240 @@ body {
 }
 
 .profile-container{
-    width: 1300px;
-    height: 820px;
+    width: 100%;
+    max-width: 1300px;
+    min-height: 820px;
     margin: auto;
     padding: 20px;
     background-color: #1c1c1c;
     border-radius: 12px;
     user-select: none;
+}
+
+/* Responsive Media Queries */
+@media (min-width: 1201px) {
+    :root {
+        --header-height: 70px;
+    }
+
+    .search-bar {
+        max-width: 500px;
+    }
+}
+
+@media (max-width: 1200px) {
+    :root {
+        --header-height: 60px;
+    }
+
+    .logo {
+        font-size: 26px;
+    }
+
+    .sidebar {
+        width: 25%;
+    }
+
+    .profile-content {
+        grid-template-columns: 1fr;
+    }
+
+    .search-bar {
+        max-width: 300px;
+    }
+}
+
+@media (max-width: 992px) {
+    :root {
+        --header-height: 60px;
+    }
+
+    .header {
+        padding: 0 15px;
+    }
+
+    .logo {
+        font-size: 24px;
+    }
+
+    .search-bar {
+        max-width: 250px;
+        margin: 0 10px;
+    }
+
+    .sidebar {
+        width: 30%;
+    }
+
+    .main {
+        padding: 15px;
+    }
+
+    .gallery-item {
+        width: 180px;
+        height: 180px;
+    }
+
+    .username {
+        max-width: 100px;
+    }
+}
+
+@media (max-width: 768px) {
+    .content {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        margin-top: 10px;
+        max-height: 300px;
+    }
+
+    .main {
+        padding: 10px;
+    }
+
+    .mobile-menu-button {
+        display: block;
+        order: 1;
+    }
+
+    .header .search-bar {
+        display: none; /* Приховуємо основний пошук на мобільних */
+    }
+
+    .logo {
+        order: 2;
+    }
+
+    .user-profile {
+        margin-left: auto;
+        order: 3;
+    }
+
+    .profile-content {
+        grid-template-columns: 1fr;
+    }
+
+    .settings-container {
+        padding: 15px;
+    }
+
+    .settings-section {
+        padding: 15px;
+    }
+
+    .post-card {
+        width: 160px;
+        height: 160px;
+    }
+
+    .header {
+        position: relative;
+        z-index: 100;
+        padding: 0 10px;
+        justify-content: space-between;
+    }
+
+    .mobile-menu {
+        position: fixed;
+        top: var(--header-height, 60px); /* Використовуємо CSS змінну для висоти хедера */
+        left: 0;
+        right: 0;
+        z-index: 99;
+        max-height: calc(100vh - var(--header-height, 60px));
+        overflow-y: auto;
+    }
+}
+
+@media (max-width: 576px) {
+    :root {
+        --header-height: 50px;
+    }
+
+    .logo {
+        font-size: 20px;
+    }
+
+    .header {
+        padding: 0 8px;
+    }
+
+    .gallery-item {
+        width: 150px;
+        height: 150px;
+    }
+
+    .profile-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .profile-avatar {
+        margin-bottom: 10px;
+    }
+
+    .comment .comment-meta {
+        font-size: 14px;
+    }
+
+    .post-card {
+        width: 140px;
+        height: 140px;
+    }
+
+    .user-posts, #liked-posts {
+        gap: 15px;
+        padding: 10px;
+    }
+
+    .profile-settings-btn {
+        padding: 8px 15px;
+        font-size: 13px;
+    }
+
+    .settings-container {
+        padding: 10px;
+    }
+
+    .settings-section {
+        padding: 12px;
+        margin-bottom: 15px;
+    }
+
+    .settings-section h2 {
+        font-size: 16px;
+    }
+
+    .settings-section p {
+        font-size: 13px;
+    }
+
+    .settings-input {
+        padding: 8px;
+    }
+
+    .settings-button {
+        padding: 8px 15px;
+        font-size: 13px;
+    }
+
+    .mobile-nav-link {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+
+    .mobile-nav-icon {
+        font-size: 16px;
+    }
+
+    .mobile-menu {
+        padding: 10px;
+    }
+
+    .mobile-search input {
+        padding: 6px 10px;
+        font-size: 14px;
+    }
 }
