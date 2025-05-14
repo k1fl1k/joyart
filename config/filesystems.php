@@ -62,7 +62,17 @@ return [
             'root' => storage_path('app/public'),
             'url' => env('AZURE_STORAGE_URL', env('APP_URL').'/storage'),
             'visibility' => 'public',
-            'throw' => false,
+            'throw' => true, // Змінюємо на true, щоб бачити помилки
+            'permissions' => [
+                'file' => [
+                    'public' => 0644,
+                    'private' => 0600,
+                ],
+                'dir' => [
+                    'public' => 0755,
+                    'private' => 0700,
+                ],
+            ],
         ],
 
     ],

@@ -3,6 +3,14 @@
         <div class="text-green-500 mb-2">{{ session('message') }}</div>
     @endif
 
+    @if (session()->has('error'))
+        <div class="text-red-500 mb-2">{{ session('error') }}</div>
+    @endif
+
+    @if (session()->has('warning'))
+        <div class="text-yellow-500 mb-2">{{ session('warning') }}</div>
+    @endif
+
     <form wire:submit.prevent="save" class="space-y-4" enctype="multipart/form-data">
         <div>
             <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
@@ -13,7 +21,7 @@
             </p>
 
             <!-- Input for file upload -->
-            <input type="file" wire:model="avatar" class="w-full text-white" id="avatar">
+            <input type="file" wire:model.live="avatar" class="w-full text-white" id="avatar" wire:change="handleFileUpload">
 
             @error('avatar') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
 
@@ -22,11 +30,17 @@
             </div>
 
             <!-- Preview Image Section -->
-            @if ($previewImage)
-                <div class="mt-2">
+            <div class="mt-2">
+                @if ($previewImage)
                     <img src="{{ $previewImage }}" alt="Прев'ю" class="w-24 h-24 rounded-full object-cover">
-                </div>
-            @endif
+                @elseif (Auth::user()->avatar)
+                    <img src="{{ Auth::user()->avatar }}" alt="Поточний аватар" class="w-24 h-24 rounded-full object-cover">
+                    <p class="text-xs text-gray-500 mt-1">Поточний аватар</p>
+                @else
+                    <img src="{{ asset('storage/images/avatar-male.png') }}" alt="Заглушка" class="w-24 h-24 rounded-full object-cover">
+                    <p class="text-xs text-gray-500 mt-1">Заглушка</p>
+                @endif
+            </div>
         </div>
 
         <div class="flex items-center gap-4">
@@ -37,25 +51,4 @@
     </form>
 </div>
 
-<script>
-    function previewImage(event) {
-        const file = event.target.files[0];
-        const previewContainer = document.getElementById('image-preview-container');
-        const previewImage = document.getElementById('image-preview');
-
-        // Check if file is an image
-        if (file && file.type.startsWith('image/')) {
-            const reader = new FileReader();
-
-            reader.onload = function(e) {
-                // Set image source to the loaded file
-                previewImage.src = e.target.result;
-                previewContainer.style.display = 'block'; // Show the preview container
-            };
-
-            reader.readAsDataURL(file);
-        } else {
-            previewContainer.style.display = 'none'; // Hide the preview container if not an image
-        }
-    }
-</script>
+<!-- Видаляємо скрипт, оскільки використовуємо Livewire для попереднього перегляду -->
