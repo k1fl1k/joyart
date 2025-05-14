@@ -19,7 +19,31 @@ class ArtworkController extends Controller
 {
     public function store(Request $request)
     {
-        Log::info('Processing artwork upload request.', ['user_id' => auth()->id()]);
+        Log::info('Processing artwork upload request.', [
+            'user_id' => auth()->id(),
+            'has_file' => $request->hasFile('original'),
+            'content_type' => $request->header('Content-Type'),
+            'method' => $request->method(),
+            'all_inputs' => array_keys($request->all())
+        ]);
+
+        // Check if file exists in request
+        if (!$request->hasFile('original')) {
+            Log::error('No file found in request', [
+                'files' => $request->allFiles(),
+                'headers' => $request->headers->all(),
+            ]);
+            return back()->withErrors(['original' => 'The original field is required. No file was received by the server.']);
+        }
+
+        // Check if file is valid
+        if (!$request->file('original')->isValid()) {
+            Log::error('File upload failed or is invalid', [
+                'error' => $request->file('original')->getError(),
+                'error_message' => $request->file('original')->getErrorMessage()
+            ]);
+            return back()->withErrors(['original' => 'The uploaded file is invalid or the upload failed.']);
+        }
 
         try {
             $validated = $request->validate([
@@ -54,10 +78,31 @@ class ArtworkController extends Controller
 
             $extension = $file->getClientOriginalExtension();
             $fileSize = $file->getSize();
-            $filePath = $file->store('artworks/originals', 'public');
 
-            // Отримуємо публічний URL для файлу
-            $fileUrl = Storage::url($filePath);
+            // Визначаємо, який диск використовувати
+            $disk = 'public'; // За замовчуванням використовуємо public
+
+            try {
+                // Спробуємо зберегти файл
+                $filePath = $file->store('artworks/originals', $disk);
+
+                // Отримуємо публічний URL для файлу
+                $fileUrl = Storage::disk($disk)->url($filePath);
+
+                Log::info('File stored successfully using disk: ' . $disk, ['path' => $filePath, 'url' => $fileUrl]);
+            } catch (\Exception $e) {
+                Log::error('Error storing file: ' . $e->getMessage());
+
+                // Запасний варіант: зберігаємо файл локально
+                $filename = time() . '_' . Str::random(10) . '.' . $extension;
+                $filePath = 'artworks/originals/' . $filename;
+
+                // Зберігаємо файл вручну
+                Storage::disk('public')->put($filePath, file_get_contents($file->getRealPath()));
+                $fileUrl = Storage::disk('public')->url($filePath);
+
+                Log::info('File stored using fallback method', ['path' => $filePath, 'url' => $fileUrl]);
+            }
 
             Log::info('File stored successfully.', ['path' => $filePath, 'url' => $fileUrl]);
 
@@ -153,7 +198,17 @@ class ArtworkController extends Controller
                     $constraint->aspectRatio();
                     $constraint->upsize();
                 });
-                Storage::disk('public')->put($thumbnailPath, $image->toJpeg(75));
+                try {
+                    Storage::disk('public')->put($thumbnailPath, $image->toJpeg(75));
+                } catch (\Exception $e) {
+                    Log::error('Error storing thumbnail: ' . $e->getMessage());
+                    // Зберігаємо в локальну файлову систему
+                    $localPath = storage_path('app/public/' . $thumbnailPath);
+                    if (!file_exists(dirname($localPath))) {
+                        mkdir(dirname($localPath), 0755, true);
+                    }
+                    file_put_contents($localPath, $image->toJpeg(75)->toString());
+                }
 
             }  elseif (in_array($extension, ['gif', 'mp4', 'mov', 'avi'])) {
                 $ffmpeg = FFMpeg\FFMpeg::create();
@@ -192,7 +247,16 @@ class ArtworkController extends Controller
     protected function extractColors($filePath)
     {
         try {
-            $palette = Palette::fromFilename(storage_path('app/public/'.$filePath));
+            // Спробуємо отримати повний шлях до файлу
+            $fullPath = storage_path('app/public/'.$filePath);
+
+            // Перевіряємо, чи існує файл
+            if (!file_exists($fullPath)) {
+                Log::warning('File not found for color extraction: ' . $fullPath);
+                return [];
+            }
+
+            $palette = Palette::fromFilename($fullPath);
             $extractor = new ColorExtractor($palette);
             $colors = array_map(fn ($color) => sprintf('#%06X', $color), $extractor->extract(4));
 

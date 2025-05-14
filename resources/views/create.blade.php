@@ -3,7 +3,7 @@
         <!-- Панель зліва -->
         <div class="w-1/3 p-4 border-r">
             <h2 class="text-lg font-bold mb-2">Preview</h2>
-            <div class="border rounded-lg p-2 bg-gray-100 flex justify-center items-center relative cursor-pointer" onclick="document.getElementById('original').click();">
+            <div class="border rounded-lg p-2 bg-gray-100 flex justify-center items-center relative cursor-pointer">
                 <img id="imagePreview" class="w-full h-auto rounded-md hidden" alt="Image preview">
                 <video id="videoPreview" class="w-full h-auto rounded-md hidden" controls></video>
                 <p id="noMediaText" class="text-gray-500 text-sm">Click to upload an image or video</p>
@@ -22,9 +22,14 @@
                     </ul>
                 </div>
             @endif
-            <form action="{{ route('artworks.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('artworks.store') }}" method="POST" enctype="multipart/form-data" id="artwork-form">
                 @csrf
-                <input type="file" name="original" id="original" class="hidden" accept="image/*,video/*">
+                <!-- File input is now visible for easier debugging -->
+                <div class="mb-4 p-2 border rounded">
+                    <label for="original" class="block text-sm font-medium mb-1">Upload File (Required)</label>
+                    <input type="file" name="original" id="original" class="w-full" accept="image/*,video/*">
+                    <p class="text-xs text-gray-500 mt-1">Supported formats: JPG, JPEG, PNG, GIF, MP4, MOV, AVI</p>
+                </div>
 
                 <div class="register-form-group">
                     <label for="type" class="register-form-label">Type</label>
@@ -84,29 +89,7 @@
     <script>
 
 
-        document.getElementById('original').addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            const imagePreview = document.getElementById('imagePreview');
-            const videoPreview = document.getElementById('videoPreview');
-            const noMediaText = document.getElementById('noMediaText');
-
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    if (file.type.startsWith('image/')) {
-                        imagePreview.src = e.target.result;
-                        imagePreview.classList.remove('hidden');
-                        videoPreview.classList.add('hidden');
-                    } else if (file.type.startsWith('video/')) {
-                        videoPreview.src = e.target.result;
-                        videoPreview.classList.remove('hidden');
-                        imagePreview.classList.add('hidden');
-                    }
-                    noMediaText.classList.add('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+        // File change event listener moved to the main form handling code
 
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -175,9 +158,39 @@
                 }
             });
 
-            const form = document.querySelector("form");
+            const form = document.getElementById("artwork-form");
             const fileInput = document.getElementById("original");
+            const previewImage = document.getElementById("imagePreview");
+            const previewVideo = document.getElementById("videoPreview");
+            const noMediaText = document.getElementById("noMediaText");
 
+            // Function to update the preview when a file is selected
+            function updatePreview() {
+                if (fileInput.files && fileInput.files[0]) {
+                    const file = fileInput.files[0];
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        if (file.type.startsWith('image/')) {
+                            previewImage.src = e.target.result;
+                            previewImage.classList.remove('hidden');
+                            previewVideo.classList.add('hidden');
+                        } else if (file.type.startsWith('video/')) {
+                            previewVideo.src = e.target.result;
+                            previewVideo.classList.remove('hidden');
+                            previewImage.classList.add('hidden');
+                        }
+                        noMediaText.classList.add('hidden');
+                    };
+
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            // Update preview when file is selected
+            fileInput.addEventListener("change", updatePreview);
+
+            // Handle form submission
             form.addEventListener("submit", function (event) {
                 // Check if file is selected
                 if (!fileInput.files.length) {
@@ -186,42 +199,60 @@
                     return;
                 }
 
-                // Try to use fetch API for submission
+                // On Azure, we'll use traditional form submission by default
+                // as it's more reliable for file uploads
+                if (window.location.hostname.includes('azure') ||
+                    window.location.hostname.includes('.com') ||
+                    window.location.hostname.includes('.net')) {
+                    console.log("Using traditional form submission on production server");
+                    return true; // Allow normal form submission
+                }
+
+                // For local development, try fetch API first with fallback
                 try {
                     event.preventDefault();
 
-                    const formData = new FormData(form); // Use the form directly to get all fields
+                    const formData = new FormData(form);
 
-                    // Ensure the file is included
-                    if (fileInput.files.length) {
-                        formData.set("original", fileInput.files[0]);
-                    }
+                    // Log what we're sending
+                    console.log("Submitting form with file:", fileInput.files[0].name);
 
-                fetch(form.action, {
-                    method: "POST",
-                    body: formData,
-                })
-                .then((res) => {
-                    if (res.redirected) {
-                        window.location.href = res.url;
-                        return { success: true };
-                    }
-                    return res.json();
-                })
-                .then((data) => {
-                    if (data.success) {
-                        window.location.href = "{{ route('welcome') }}";
-                    } else {
-                        alert("Error uploading file.");
-                    }
-                })
-                .catch((err) => {
-                    console.error(err);
-                    alert("Using traditional form submission as fallback. Please wait...");
-                    // Allow traditional form submission as fallback
-                    form.removeEventListener('submit', arguments.callee);
-                    form.submit();
-                });
+                    // Show loading indicator
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.textContent;
+                    submitBtn.textContent = "Uploading...";
+                    submitBtn.disabled = true;
+
+                    fetch(form.action, {
+                        method: "POST",
+                        body: formData,
+                    })
+                    .then((res) => {
+                        if (res.redirected) {
+                            window.location.href = res.url;
+                            return { success: true };
+                        }
+                        if (!res.ok) {
+                            throw new Error(`Server responded with ${res.status}: ${res.statusText}`);
+                        }
+                        return res.json();
+                    })
+                    .then((data) => {
+                        if (data.success) {
+                            window.location.href = "{{ route('welcome') }}";
+                        } else {
+                            alert("Error uploading file.");
+                            submitBtn.textContent = originalText;
+                            submitBtn.disabled = false;
+                        }
+                    })
+                    .catch((err) => {
+                        console.error("Fetch error:", err);
+                        alert("Using traditional form submission as fallback. Please wait...");
+                        // Submit the form traditionally
+                        form.removeEventListener('submit', arguments.callee);
+                        form.submit();
+                    });
                 } catch (error) {
                     console.error("Error in fetch submission, falling back to traditional form submission", error);
                     // Allow the form to submit normally
