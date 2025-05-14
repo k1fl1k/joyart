@@ -32,23 +32,35 @@ class UpdateAvatarForm extends Component
 
         $user = Auth::user();
 
-        // Delete the old avatar if it exists
-        if ($user->avatar) {
-            Storage::disk('public')->delete($user->avatar);
+        try {
+            // Визначаємо диск для зберігання (azure в хмарі або public локально)
+            $disk = env('APP_ENV') === 'production' ? 'azure' : 'public';
+
+            // Delete the old avatar if it exists
+            if ($user->avatar) {
+                // Отримуємо тільки шлях файлу без URL
+                $oldPath = str_replace(Storage::disk($disk)->url(''), '', $user->avatar);
+                if (Storage::disk($disk)->exists($oldPath)) {
+                    Storage::disk($disk)->delete($oldPath);
+                }
+            }
+
+            // Store the file to the appropriate disk
+            $path = $this->avatar->store('avatars', $disk);
+
+            // Get the full URL to the file
+            $fileUrl = Storage::disk($disk)->url($path);
+
+            // Save the new path to the database
+            $user->avatar = $fileUrl;
+            $user->save();
+
+            session()->flash('message', 'Аватар оновлено!');
+            $this->reset('avatar');
+            $this->previewImage = null;
+        } catch (\Exception $e) {
+            session()->flash('error', 'Помилка при завантаженні аватара: ' . $e->getMessage());
         }
-
-        // Store the file to the public disk
-        $path = $this->avatar->store('avatars', 'public');
-
-        $fileUrl = Storage::url($path);
-
-        // Save the new path to the database
-        $user->avatar = $fileUrl;
-        $user->save();
-
-        session()->flash('message', 'Аватар оновлено!');
-        $this->reset('avatar');
-        $this->previewImage = null;
     }
 
     public function render()
