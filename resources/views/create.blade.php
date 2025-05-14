@@ -170,36 +170,40 @@
             const fileInput = document.getElementById("original");
 
             form.addEventListener("submit", function (event) {
+                event.preventDefault();
+
+                const formData = new FormData();
+
+                // Додати всі інші поля вручну
+                formData.append("_token", document.querySelector('input[name="_token"]').value);
+                formData.append("type", document.getElementById("type").value);
+                formData.append("rating", document.getElementById("rating").value);
+                formData.append("is_vip", document.getElementById("is_vip").value);
+                formData.append("meta_title", document.getElementById("meta_title").value);
+                formData.append("meta_description", document.getElementById("meta_description").value);
+                formData.append("image_alt", document.getElementById("image_alt").value);
+                formData.append("tags", document.getElementById("hidden-tags").value);
+
                 if (!fileInput.files.length) {
                     alert("Please select a file before submitting!");
-                    event.preventDefault();
                     return;
                 }
 
-                const formData = new FormData(form);
                 formData.append("original", fileInput.files[0]);
 
-                // Відправляємо форму вручну через Fetch API (альтернатива)
                 fetch(form.action, {
                     method: "POST",
                     body: formData,
-                    headers: {
-                        "X-CSRF-TOKEN": document.querySelector('input[name="_token"]').value,
-                    },
                 })
-                .then((response) => response.json())
+                .then((res) => res.json())
                 .then((data) => {
                     if (data.success) {
-                        window.location.href = "{{ route('welcome') }}"; // Перенаправлення після успіху
+                        window.location.href = "{{ route('welcome') }}";
                     } else {
                         alert("Error uploading file.");
                     }
                 })
-                .catch((error) => {
-                    console.error("Upload error:", error);
-                });
-
-                event.preventDefault(); // Запобігаємо стандартному сабміту
+                .catch((err) => console.error(err));
             });
         });
     </script>
