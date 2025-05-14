@@ -21,7 +21,7 @@
             </p>
 
             <!-- Input for file upload -->
-            <input type="file" wire:model.live="avatar" class="w-full text-white" id="avatar" wire:change="handleFileUpload">
+            <input type="file" wire:model="avatar" class="w-full text-white" id="avatar" wire:change="handleFileUpload">
 
             @error('avatar') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
 

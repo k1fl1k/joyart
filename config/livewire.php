@@ -97,7 +97,7 @@ return [
 
     'temporary_file_upload' => [
         'disk' => 'public', // Завжди використовуємо public для тимчасових файлів
-        'rules' => ['file', 'max:12288'], // Видаляємо 'required', щоб уникнути помилок валідації
+        'rules' => null, // Вимикаємо валідацію на рівні конфігурації
         'directory' => 'livewire-tmp',
         'middleware' => null,
         'preview_mimes' => [
@@ -105,7 +105,7 @@ return [
             'mov', 'avi', 'wmv', 'mp3', 'm4a',
             'jpg', 'jpeg', 'mpga', 'webp', 'wma',
         ],
-        'max_upload_time' => 60, // Збільшуємо час для завантаження файлів
+        'max_upload_time' => 120, // Збільшуємо час для завантаження файлів
     ],
 
     /*
