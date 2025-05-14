@@ -4,7 +4,6 @@
         <div class="w-1/3 p-4 border-r">
             <h2 class="text-lg font-bold mb-2">Preview</h2>
             <div class="border rounded-lg p-2 bg-gray-100 flex justify-center items-center relative cursor-pointer" onclick="document.getElementById('original').click();">
-                <input type="file" name="original" id="original" class="hidden" accept="image/*,video/*">
                 <img id="imagePreview" class="w-full h-auto rounded-md hidden" alt="Image preview">
                 <video id="videoPreview" class="w-full h-auto rounded-md hidden" controls></video>
                 <p id="noMediaText" class="text-gray-500 text-sm">Click to upload an image or video</p>
@@ -14,8 +13,18 @@
         <!-- Форма справа -->
         <div class="w-2/3 p-4">
             <h1 class="register-form-header">Create Post</h1>
+            @if ($errors->any())
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             <form action="{{ route('artworks.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
+                <input type="file" name="original" id="original" class="hidden" accept="image/*,video/*">
 
                 <div class="register-form-group">
                     <label for="type" class="register-form-label">Type</label>
@@ -170,32 +179,35 @@
             const fileInput = document.getElementById("original");
 
             form.addEventListener("submit", function (event) {
-                event.preventDefault();
-
-                const formData = new FormData();
-
-                // Додати всі інші поля вручну
-                formData.append("_token", document.querySelector('input[name="_token"]').value);
-                formData.append("type", document.getElementById("type").value);
-                formData.append("rating", document.getElementById("rating").value);
-                formData.append("is_vip", document.getElementById("is_vip").value);
-                formData.append("meta_title", document.getElementById("meta_title").value);
-                formData.append("meta_description", document.getElementById("meta_description").value);
-                formData.append("image_alt", document.getElementById("image_alt").value);
-                formData.append("tags", document.getElementById("hidden-tags").value);
-
+                // Check if file is selected
                 if (!fileInput.files.length) {
+                    event.preventDefault();
                     alert("Please select a file before submitting!");
                     return;
                 }
 
-                formData.append("original", fileInput.files[0]);
+                // Try to use fetch API for submission
+                try {
+                    event.preventDefault();
+
+                    const formData = new FormData(form); // Use the form directly to get all fields
+
+                    // Ensure the file is included
+                    if (fileInput.files.length) {
+                        formData.set("original", fileInput.files[0]);
+                    }
 
                 fetch(form.action, {
                     method: "POST",
                     body: formData,
                 })
-                .then((res) => res.json())
+                .then((res) => {
+                    if (res.redirected) {
+                        window.location.href = res.url;
+                        return { success: true };
+                    }
+                    return res.json();
+                })
                 .then((data) => {
                     if (data.success) {
                         window.location.href = "{{ route('welcome') }}";
@@ -203,7 +215,18 @@
                         alert("Error uploading file.");
                     }
                 })
-                .catch((err) => console.error(err));
+                .catch((err) => {
+                    console.error(err);
+                    alert("Using traditional form submission as fallback. Please wait...");
+                    // Allow traditional form submission as fallback
+                    form.removeEventListener('submit', arguments.callee);
+                    form.submit();
+                });
+                } catch (error) {
+                    console.error("Error in fetch submission, falling back to traditional form submission", error);
+                    // Allow the form to submit normally
+                    return true;
+                }
             });
         });
     </script>

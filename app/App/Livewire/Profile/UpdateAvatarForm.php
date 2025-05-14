@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Illuminate\Support\Str;
 
 class UpdateAvatarForm extends Component
 {
@@ -14,6 +15,7 @@ class UpdateAvatarForm extends Component
 
     public $avatar;
     public $previewImage = null;
+    public $uploadError = null;
 
     public function mount()
     {
@@ -23,62 +25,118 @@ class UpdateAvatarForm extends Component
     public function updatedAvatar()
     {
         Log::info('updatedAvatar method called');
+        $this->uploadError = null;
 
         if (!$this->avatar) {
             Log::warning('Avatar is null in updatedAvatar method');
+            $this->uploadError = 'Файл не вибрано';
             return;
         }
 
-        Log::info('Avatar file info in updatedAvatar: ' . json_encode([
-            'name' => $this->avatar->getClientOriginalName(),
-            'size' => $this->avatar->getSize(),
-            'mime' => $this->avatar->getMimeType(),
-            'extension' => $this->avatar->getClientOriginalExtension(),
-        ]));
-
-        $this->validate([
-            'avatar' => 'image|max:2048',
-        ]);
-
         try {
-            // Генерація попереднього перегляду зображення
-            Log::info('Trying to generate preview image in updatedAvatar');
-            $this->previewImage = $this->avatar->temporaryUrl();
-            Log::info('Preview image generated successfully in updatedAvatar');
+            Log::info('Avatar file info in updatedAvatar: ' . json_encode([
+                'name' => $this->avatar->getClientOriginalName(),
+                'size' => $this->avatar->getSize(),
+                'mime' => $this->avatar->getMimeType(),
+                'extension' => $this->avatar->getClientOriginalExtension(),
+            ]));
 
-            // Викликаємо handleFileUpload для додаткової обробки
-            $this->handleFileUpload();
+            // Validate file type and size directly
+            $extension = strtolower($this->avatar->getClientOriginalExtension());
+            if (!in_array($extension, ['jpg', 'jpeg', 'png', 'gif'])) {
+                $this->uploadError = 'Непідтримуваний тип файлу. Дозволені типи: jpg, jpeg, png, gif';
+                $this->reset('avatar');
+                return;
+            }
+
+            if ($this->avatar->getSize() > 2 * 1024 * 1024) { // 2MB
+                $this->uploadError = 'Файл занадто великий. Максимальний розмір: 2MB';
+                $this->reset('avatar');
+                return;
+            }
+
+            // Try to generate preview
+            try {
+                Log::info('Trying to generate preview image in updatedAvatar');
+                $this->previewImage = $this->avatar->temporaryUrl();
+                Log::info('Preview image generated successfully in updatedAvatar');
+            } catch (\Exception $e) {
+                // If we can't generate a preview, continue anyway
+                $this->previewImage = null;
+                Log::warning('Could not generate preview, but continuing: ' . $e->getMessage());
+            }
         } catch (\Exception $e) {
-            // Якщо не вдалося отримати тимчасовий URL, використовуємо заглушку
-            $this->previewImage = null;
-            Log::error('Error generating preview in updatedAvatar: ' . $e->getMessage());
+            $this->uploadError = 'Помилка при обробці файлу: ' . $e->getMessage();
+            Log::error('Error in updatedAvatar: ' . $e->getMessage());
             Log::error('Error trace: ' . $e->getTraceAsString());
-            session()->flash('warning', 'Не вдалося створити попередній перегляд, але ви все одно можете завантажити файл.');
+            $this->reset('avatar');
         }
     }
 
     public function save()
     {
-        $this->validate([
-            'avatar' => 'required|image|max:2048',
-        ]);
-
-        $user = Auth::user();
+        Log::info('Save method called');
 
         try {
-            // Використовуємо завжди локальний диск public
-            $disk = 'public';
-            Log::info('Using disk: ' . $disk);
+            // Check if we have a file
+            if (!$this->avatar) {
+                $this->uploadError = 'Файл не вибрано. Будь ласка, виберіть зображення.';
+                Log::error('Avatar is null in save method');
+                return;
+            }
 
-            // Створюємо унікальне ім'я файлу
-            $filename = 'avatar_' . $user->id . '_' . time() . '.' . $this->avatar->getClientOriginalExtension();
+            // Get authenticated user
+            $user = Auth::user();
+            if (!$user) {
+                $this->uploadError = 'Користувач не авторизований';
+                Log::error('User not authenticated');
+                return;
+            }
+
+            // Get file info
+            $extension = strtolower($this->avatar->getClientOriginalExtension());
+            $fileSize = $this->avatar->getSize();
+            $mimeType = $this->avatar->getMimeType();
+
+            Log::info('Processing avatar file: ' . json_encode([
+                'name' => $this->avatar->getClientOriginalName(),
+                'size' => $fileSize,
+                'mime' => $mimeType,
+                'extension' => $extension,
+            ]));
+
+            // Validate file manually
+            if (!in_array($extension, ['jpg', 'jpeg', 'png', 'gif'])) {
+                $this->uploadError = 'Непідтримуваний тип файлу. Дозволені типи: jpg, jpeg, png, gif';
+                return;
+            }
+
+            if ($fileSize > 2 * 1024 * 1024) { // 2MB
+                $this->uploadError = 'Файл занадто великий. Максимальний розмір: 2MB';
+                return;
+            }
+
+            // Create a unique filename
+            $filename = 'avatar_' . $user->id . '_' . time() . '_' . Str::random(8) . '.' . $extension;
+            $storagePath = 'avatars';
+            $fullPath = storage_path('app/public/' . $storagePath . '/' . $filename);
+            $publicUrl = '/storage/' . $storagePath . '/' . $filename;
+
             Log::info('Generated filename: ' . $filename);
+            Log::info('Full path: ' . $fullPath);
+            Log::info('Public URL: ' . $publicUrl);
 
-            // Видаляємо старий аватар, якщо він існує
+            // Ensure the directory exists
+            $directory = storage_path('app/public/' . $storagePath);
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true);
+                Log::info('Created directory: ' . $directory);
+            }
+
+            // Delete old avatar if it exists
             if ($user->avatar) {
                 try {
-                    // Отримуємо шлях файлу з URL
-                    $oldPath = public_path(str_replace(env('APP_URL'), '', $user->avatar));
+                    $oldPath = public_path(parse_url($user->avatar, PHP_URL_PATH));
                     Log::info('Old avatar path: ' . $oldPath);
 
                     if (file_exists($oldPath)) {
@@ -89,72 +147,39 @@ class UpdateAvatarForm extends Component
                     }
                 } catch (\Exception $e) {
                     Log::error('Error deleting old avatar: ' . $e->getMessage());
-                    // Продовжуємо виконання
+                    // Continue execution
                 }
             }
 
-            // Зберігаємо файл в публічну директорію
+            // Save the file directly
             try {
-                $path = $this->avatar->storeAs('avatars', $filename, $disk);
-                Log::info('Stored new avatar at: ' . $path);
+                // Get the file contents
+                $fileContents = file_get_contents($this->avatar->getRealPath());
+
+                // Save the file to disk
+                file_put_contents($fullPath, $fileContents);
+                Log::info('Saved avatar file to: ' . $fullPath);
+
+                // Update user record
+                $user->avatar = $publicUrl;
+                $user->save();
+                Log::info('Updated user avatar in database');
+
+                session()->flash('message', 'Аватар оновлено!');
+                $this->reset(['avatar', 'previewImage', 'uploadError']);
             } catch (\Exception $e) {
-                Log::error('Error storing avatar: ' . $e->getMessage());
+                $this->uploadError = 'Помилка при збереженні файлу: ' . $e->getMessage();
+                Log::error('Error saving file: ' . $e->getMessage());
                 Log::error('Error trace: ' . $e->getTraceAsString());
-                throw $e;
             }
-
-            // Формуємо URL до файлу
-            $fileUrl = env('APP_URL') . '/storage/avatars/' . $filename;
-            Log::info('New avatar URL: ' . $fileUrl);
-
-            // Зберігаємо шлях в базу даних
-            $user->avatar = $fileUrl;
-            $user->save();
-            Log::info('Updated user avatar in database');
-
-            session()->flash('message', 'Аватар оновлено!');
-            $this->reset('avatar');
-            $this->previewImage = null;
         } catch (\Exception $e) {
+            $this->uploadError = 'Помилка при завантаженні аватара: ' . $e->getMessage();
             Log::error('Avatar upload error: ' . $e->getMessage());
             Log::error('Error trace: ' . $e->getTraceAsString());
-            session()->flash('error', 'Помилка при завантаженні аватара: ' . $e->getMessage());
         }
     }
 
-    public function handleFileUpload()
-    {
-        Log::info('handleFileUpload method called');
-
-        if (!$this->avatar) {
-           Log::warning('Avatar is null in handleFileUpload method');
-            return;
-        }
-
-        Log::info('Avatar file info: ' . json_encode([
-            'name' => $this->avatar->getClientOriginalName(),
-            'size' => $this->avatar->getSize(),
-            'mime' => $this->avatar->getMimeType(),
-            'extension' => $this->avatar->getClientOriginalExtension(),
-        ]));
-
-        $this->validate([
-            'avatar' => 'image|max:2048',
-        ]);
-
-        try {
-            // Генерація попереднього перегляду зображення
-            Log::info('Trying to generate preview image');
-            $this->previewImage = $this->avatar->temporaryUrl();
-            Log::info('Preview image generated successfully');
-        } catch (\Exception $e) {
-            // Якщо не вдалося отримати тимчасовий URL, використовуємо заглушку
-            $this->previewImage = null;
-            Log::error('Error generating preview: ' . $e->getMessage());
-            Log::error('Error trace: ' . $e->getTraceAsString());
-            session()->flash('warning', 'Не вдалося створити попередній перегляд, але ви все одно можете завантажити файл.');
-        }
-    }
+    // Removed handleFileUpload method as it's redundant with updatedAvatar
 
     public function render()
     {
