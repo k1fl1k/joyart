@@ -54,7 +54,7 @@ class ArtworkController extends Controller
 
             $extension = $file->getClientOriginalExtension();
             $fileSize = $file->getSize();
-            $filePath = $file->store('artworks/originals', 'public');
+            $filePath = $file->store('artworks/originals', 'azure');
 
             // Отримуємо публічний URL для файлу
             $fileUrl = Storage::url($filePath);

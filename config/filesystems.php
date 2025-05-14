@@ -58,11 +58,13 @@ return [
         ],
 
         'azure' => [
-            'driver' => 'local',
-            'root' => public_path('storage'), // Використовуємо public_path замість storage_path
-            'url' => env('APP_URL').'/storage',
-            'visibility' => 'public',
-            'throw' => true,
+            'driver' => 'azure',
+            'account_name' => env('AZURE_STORAGE_ACCOUNT'),
+            'account_key' => env('AZURE_STORAGE_KEY'),
+            'container' => env('AZURE_STORAGE_CONTAINER'),
+            'url' => env('AZURE_STORAGE_URL'), // Опціонально
+            'endpoint' => env('AZURE_STORAGE_ENDPOINT'), // Опціонально
+            'throw' => false,
         ],
 
     ],
