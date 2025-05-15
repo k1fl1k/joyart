@@ -22,16 +22,16 @@ return new class extends Migration
             $table->integer('height');
             $table->string('file_ext');
             $table->unsignedBigInteger('file_size');
-            $table->string('thumbnail'); // Шлях до превью
-            $table->string('original'); // Шлях до оригіналу
+            $table->string('thumbnail', 512); // Шлях до превью
+            $table->string('original', 512); // Шлях до оригіналу
             $table->boolean('is_vip');
             $table->json('colors'); // Масив із 4 кольорів
-            $table->string('source')->nullable(); // URL оригінального джерела
+            $table->string('source', 512)->nullable(); // URL оригінального джерела
             $table->boolean('is_published')->default(false);
             $table->string('slug', 71)->unique();
             $table->string('meta_title', 128)->unique();
             $table->string('meta_description', 278);
-            $table->string('image', 128)->nullable();
+            $table->string('image', 512)->nullable();
             $table->string('image_alt', 256)->nullable();
             $table->timestamps();
         });

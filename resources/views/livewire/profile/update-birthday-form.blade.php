@@ -1,6 +1,6 @@
 <div class="mb-6">
-    @if (session()->has('message'))
-        <div class="text-green-500 mb-2">{{ session('message') }}</div>
+    @if (session()->has('birthday_message'))
+        <div class="text-green-500 mb-2">{{ session('birthday_message') }}</div>
     @endif
 
     <form wire:submit.prevent="updateBirthday" class="space-y-4">

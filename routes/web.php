@@ -32,6 +32,9 @@ Route::put('/profile/update-description', [ProfileController::class, 'updateDesc
 Route::post('/profile/start-editing', [ProfileController::class, 'startEditing'])
     ->middleware(['auth'])
     ->name('profile.startEditing');
+Route::post('/profile/update-avatar', [ProfileController::class, 'updateAvatar'])
+    ->middleware(['auth'])
+    ->name('profile.updateAvatar');
 
 Route::get('/tag/{tag:slug}', [GalleryController::class, 'filterByTag'])->name('gallery.byTag');
 

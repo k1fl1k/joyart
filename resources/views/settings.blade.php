@@ -15,7 +15,7 @@
 
             <!-- Форма оновлення аватарки -->
             <div class="settings-section">
-                <livewire:profile.update-avatar-form />
+                @include('livewire.profile.update-avatar-form')
             </div>
 
             <!-- Форма оновлення пароля -->

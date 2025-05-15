@@ -51,7 +51,7 @@ class UpdateBirthdayForm extends Component
         $user->allow_adult = $this->isOldEnough ? $this->allow_adult : false;
         $user->save();
 
-        session()->flash('message', 'Дата народження оновлена!');
+        session()->flash('birthday_message', 'Дата народження оновлена!');
     }
 
 }
