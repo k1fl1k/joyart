@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use k1fl1k\joyart\Models\Artwork;
+use k1fl1k\joyart\Models\Report;
 use k1fl1k\joyart\Models\Tag;
 use k1fl1k\joyart\Models\User;
 
@@ -16,8 +17,9 @@ class AdminController extends Controller
         $usersCount = User::count();
         $artworksCount = Artwork::count();
         $tagsCount = Tag::count();
+        $pendingReportsCount = Report::where('status', Report::STATUS_PENDING)->count();
 
-        return view('admin.panel', compact('usersCount', 'artworksCount', 'tagsCount'));
+        return view('admin.panel', compact('usersCount', 'artworksCount', 'tagsCount', 'pendingReportsCount'));
     }
 
     public function updateUser(Request $request)
