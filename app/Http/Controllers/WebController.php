@@ -2,10 +2,10 @@
 
 namespace k1fl1k\joyart\Http\Controllers;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use k1fl1k\joyart\Models\Artwork;
 use k1fl1k\joyart\Models\Tag;
-use Illuminate\Http\Request;
 
 class WebController extends Controller
 {
@@ -14,13 +14,16 @@ class WebController extends Controller
         $query = Artwork::where('is_published', true);
 
         // Гість не бачить "questionable"
-        if (!auth()->check()) {
+        if (! auth()->check()) {
+            $query->where('rating', '!=', 'questionable');
+            $query->where('rating', '!=', 'sensitive');
+        } elseif (auth()->check() && auth()->user()->allow_adult !== true) {
             $query->where('rating', '!=', 'questionable');
         }
 
         if ($request->has('search') && $request->search) {
             $query->whereHas('tags', function ($query) use ($request) {
-                $query->where('name', 'like', '%' . $request->search . '%');
+                $query->where('name', 'like', '%'.$request->search.'%');
             });
         }
 
@@ -39,6 +42,7 @@ class WebController extends Controller
         $tags = Tag::whereNull('parent_id')->with('subtags')->get();
 
         $images = $query->paginate(50);
+
         return view('welcome', compact('tags', 'images'));
     }
 
