@@ -10,6 +10,7 @@ use k1fl1k\joyart\Http\Controllers\FavoritesController;
 use k1fl1k\joyart\Http\Controllers\GalleryController;
 use k1fl1k\joyart\Http\Controllers\LikesController;
 use k1fl1k\joyart\Http\Controllers\ProfileController;
+use k1fl1k\joyart\Http\Controllers\ReportsController;
 use k1fl1k\joyart\Http\Controllers\WebController;
 use k1fl1k\joyart\Models\Tag;
 
@@ -67,6 +68,8 @@ Route::post('/artworks/{artwork:slug}/comments', [CommentsController::class, 'st
 Route::delete('/artworks/{artwork:slug}/comments/{comment}', [CommentsController::class, 'destroy'])
     ->name('comments.destroy')
     ->middleware(['auth']);
+Route::post('/artworks/{artwork:slug}/report', [ReportsController::class, 'store'])->name('artworks.report')
+    ->middleware(['auth']);
 Route::delete('/artworks/{artwork:slug}', [ArtworkController::class, 'destroy'])->name('artworks.destroy');
 
 
@@ -89,7 +92,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/admin/fetch', [AdminController::class, 'fetchSafebooru'])->name('admin.fetchSafebooru');
     Route::get('/admin/user-search', [AdminController::class, 'searchUser'])->name('admin.userSearch');
     Route::get('/admin/user-info/{id}', [AdminController::class, 'getUserInfo'])->name('admin.userInfo');
-
+    Route::get('/admin/reports', [ReportsController::class, 'index'])->name('admin.reports.index');
+    Route::get('/admin/reports/{report}', [ReportsController::class, 'show'])->name('admin.reports.show');
+    Route::post('/admin/reports/{report}/status', [ReportsController::class, 'updateStatus'])->name('admin.reports.updateStatus');
 });
 
 require __DIR__.'/auth.php';
