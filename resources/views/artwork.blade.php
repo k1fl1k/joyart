@@ -22,6 +22,9 @@
                             <button type="submit" class="delete-button">Delete</button>
                         </form>
                     @endif
+                    @if (Auth::check() && Auth::id() !== $artwork->user_id)
+                        <button type="button" class="like-button" onclick="openReportModal()">Report Artwork</button>
+                    @endif
                 </div>
                 @php
                     $colors = json_decode($artwork->colors, true) ?? [];
@@ -118,4 +121,51 @@
             </div>
         </div>
     </div>
+    <!-- Report Modal -->
+    <div id="reportModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
+        <div class="modal-content" style="background-color: #1c1c1c; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 500px; border-radius: 8px;">
+            <span class="close" onclick="closeReportModal()" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+            <h2 style="margin-bottom: 20px;">Поскаржитись на пост</h2>
+
+            <form action="{{ route('artworks.report', $artwork->slug) }}" method="POST">
+                @csrf
+                <div style="margin-bottom: 15px;">
+                    <label for="reason" style="display: block; margin-bottom: 5px;">Причина скарги:</label>
+                    <select name="reason" id="reason" required class="rounded-lg bg-gray-800">
+                        <option value="inappropriate_content">Неприйнятний вміст</option>
+                        <option value="copyright_violation">Порушення авторських прав</option>
+                        <option value="offensive">Образливий вміст</option>
+                        <option value="spam">Спам</option>
+                        <option value="other">Інше</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label for="description" style="display: block; margin-bottom: 5px;">Опис проблеми (необов'язково):</label>
+                    <textarea name="description" id="description" rows="4" style="background-color: #222627; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+                </div>
+
+                <button type="submit" style="background-color: #4CAF50; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;">Надіслати скаргу</button>
+                <button type="button" onclick="closeReportModal()" style="background-color: #f44336; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">Скасувати</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openReportModal() {
+            document.getElementById('reportModal').style.display = 'block';
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('reportModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
 </x-app-layout>
