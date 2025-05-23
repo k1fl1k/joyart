@@ -22,9 +22,6 @@
                             <button type="submit" class="delete-button">Delete</button>
                         </form>
                     @endif
-                    @if (Auth::check() && Auth::id() !== $artwork->user_id)
-                        <button type="button" class="like-button" onclick="openReportModal()">Report Artwork</button>
-                    @endif
                 </div>
                 @php
                     $colors = json_decode($artwork->colors, true) ?? [];
@@ -82,6 +79,9 @@
                                 @endif
                             </button>
                         </form>
+                        @if (Auth::check() && Auth::id() !== $artwork->user_id)
+                            <button type="button" class="report-button" onclick="openReportModal()">Поскаржитись</button>
+                        @endif
                     </div>
 
                     <div class="comments-section">

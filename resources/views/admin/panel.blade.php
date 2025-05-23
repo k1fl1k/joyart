@@ -9,6 +9,7 @@
                     <h1 class="admin-info">Панель адміністратора</h1>
                     <p class="admin-subinfo">Вітаємо, {{ Auth::user()->username }}!</p>
                     <div class="mt-4 flex space-x-4">
+                        <a href="{{ route('admin.panel') }}" class="admin-button">Головна</a>
                         <a href="{{ route('admin.reports.index') }}" class="admin-button">Скарги на пости
                             @if(isset($pendingReportsCount) && $pendingReportsCount > 0)
                                 <span class="ml-1 px-2 py-1 bg-red-500 text-white rounded-full text-xs">{{ $pendingReportsCount }}</span>
