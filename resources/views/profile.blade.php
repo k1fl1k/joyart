@@ -26,7 +26,6 @@
                     <div class="profile-description">
                         <h3>Description</h3>
                         <p>Birthday: {{ $user->birthday ?? 'Unknown date.'}}</p>
-                        <p>Gender: {{ $user->gender ?? 'Unknown gender.'}}</p>
 
                         @if(auth()->id() === $user->id)
                             @if(session('editing_description'))
