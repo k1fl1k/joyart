@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use k1fl1k\joyart\Models\Artwork;
 use k1fl1k\joyart\Models\User;
+use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
@@ -67,7 +68,7 @@ class ProfileController extends Controller
 
             if (!$user) {
                 Log::error('User not authenticated');
-                return back()->with('error', 'Користувач не авторизований');
+                return response()->json(['error' => 'Користувач не авторизований'], 401);
             }
 
             $file = $request->file('avatar');
@@ -75,11 +76,11 @@ class ProfileController extends Controller
             $filename = 'avatar_' . $user->id . '_' . time() . '_' . Str::random(8) . '.' . $extension;
 
             Log::info('Processing avatar file: ' . json_encode([
-                'name' => $file->getClientOriginalName(),
-                'size' => $file->getSize(),
-                'mime' => $file->getMimeType(),
-                'extension' => $extension,
-            ]));
+                    'name' => $file->getClientOriginalName(),
+                    'size' => $file->getSize(),
+                    'mime' => $file->getMimeType(),
+                    'extension' => $extension,
+                ]));
 
             // Delete old avatar if it exists
             if ($user->avatar) {
@@ -95,7 +96,6 @@ class ProfileController extends Controller
                     }
                 } catch (\Exception $e) {
                     Log::error('Error deleting old avatar: ' . $e->getMessage());
-                    // Continue execution
                 }
             }
 
@@ -104,15 +104,85 @@ class ProfileController extends Controller
             Log::info('Stored avatar at: ' . $path);
 
             // Update user record
-            $user->avatar = '/storage/' . $path;
+            $avatarUrl = '/storage/' . $path;
+            $user->avatar = $avatarUrl;
             $user->save();
             Log::info('Updated user avatar in database');
 
-            return back()->with('message', 'Аватар оновлено!');
+            return response()->json([
+                'message' => 'Аватар оновлено!',
+                'avatar_url' => $avatarUrl,
+            ]);
         } catch (\Exception $e) {
             Log::error('Avatar upload error: ' . $e->getMessage());
             Log::error('Error trace: ' . $e->getTraceAsString());
-            return back()->with('error', 'Помилка при завантаженні аватара: ' . $e->getMessage());
+            return response()->json(['error' => 'Помилка при завантаженні аватара: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function updateProfile(Request $request)
+    {
+        Log::info('ProfileController@updateProfile called');
+
+        try {
+            $user = Auth::user();
+
+            if (!$user) {
+                Log::error('User not authenticated');
+                return response()->json(['error' => 'Користувач не авторизований'], 401);
+            }
+
+            $validated = $request->validate([
+                'username' => ['required', 'string', 'max:255', Rule::unique(User::class)->ignore($user->id)],
+                'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
+            ]);
+
+            $user->fill($validated);
+
+            if ($user->isDirty('email')) {
+                $user->email_verified_at = null;
+            }
+
+            $user->save();
+            Log::info('Updated user profile: ' . json_encode($validated));
+
+            return response()->json([
+                'message' => 'Профіль оновлено!',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation error: ' . json_encode($e->errors()));
+            return response()->json(['errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error('Profile update error: ' . $e->getMessage());
+            return response()->json(['error' => 'Помилка при оновленні профілю: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function sendVerification(Request $request)
+    {
+        Log::info('ProfileController@sendVerification called');
+
+        try {
+            $user = Auth::user();
+
+            if (!$user) {
+                Log::error('User not authenticated');
+                return response()->json(['error' => 'Користувач не авторизований'], 401);
+            }
+
+            if ($user->hasVerifiedEmail()) {
+                return response()->json(['message' => 'Електронна пошта вже підтверджена'], 200);
+            }
+
+            $user->sendEmailVerificationNotification();
+            Log::info('Verification email sent to: ' . $user->email);
+
+            return response()->json([
+                'message' => 'Новий лист для підтвердження надіслано на вашу електронну адресу.',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Verification email error: ' . $e->getMessage());
+            return response()->json(['error' => 'Помилка при надсиланні листа для підтвердження: ' . $e->getMessage()], 500);
         }
     }
 }

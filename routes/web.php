@@ -36,6 +36,12 @@ Route::post('/profile/start-editing', [ProfileController::class, 'startEditing']
 Route::post('/profile/update-avatar', [ProfileController::class, 'updateAvatar'])
     ->middleware(['auth'])
     ->name('profile.updateAvatar');
+Route::post('/profile/update-profile', [ProfileController::class, 'updateProfile'])
+    ->middleware(['auth'])
+    ->name('profile.updateProfile');
+Route::post('/profile/send-verification', [ProfileController::class, 'sendVerification'])
+    ->middleware(['auth'])
+    ->name('profile.sendVerification');
 
 Route::get('/tag/{tag:slug}', [GalleryController::class, 'filterByTag'])->name('gallery.byTag');
 
