@@ -9,17 +9,33 @@ class GalleryController extends Controller
 {
     public function index()
     {
+        $query = Artwork::where('is_published', true);
+
+        // Гість не бачить "questionable" і "sensitive"
+        if (!auth()->check()) {
+            $query->where('rating', '!=', 'questionable')
+                ->where('rating', '!=', 'sensitive');
+        } elseif (auth()->check() && auth()->user()->allow_adult !== true) {
+            $query->where('rating', '!=', 'questionable');
+        }
+
         $tags = Tag::with('subtags')->get();
-        $images = Artwork::paginate(50);
+        $images = $query->paginate(50);
 
         return view('welcome', compact('tags', 'images'));
     }
 
     public function search(Request $request)
     {
-        $tags = Tag::all();
+        $query = Artwork::where('is_published', true);
 
-        $query = Artwork::query();
+        // Гість не бачить "questionable" і "sensitive"
+        if (!auth()->check()) {
+            $query->where('rating', '!=', 'questionable')
+                ->where('rating', '!=', 'sensitive');
+        } elseif (auth()->check() && auth()->user()->allow_adult !== true) {
+            $query->where('rating', '!=', 'questionable');
+        }
 
         // Search by tags
         if ($request->filled('search')) {
@@ -45,6 +61,7 @@ class GalleryController extends Controller
             $query->orderBy('created_at', $sortOrder);
         }
 
+        $tags = Tag::all();
         $images = $query->paginate(50);
 
         return view('welcome', compact('tags', 'images'));
@@ -52,10 +69,21 @@ class GalleryController extends Controller
 
     public function filterByTag(Tag $tag)
     {
+        $query = Artwork::where('is_published', true)
+            ->whereHas('tags', function ($query) use ($tag) {
+                $query->where('tags.id', $tag->id);
+            });
+
+        // Гість не бачить "questionable" і "sensitive"
+        if (!auth()->check()) {
+            $query->where('rating', '!=', 'questionable')
+                ->where('rating', '!=', 'sensitive');
+        } elseif (auth()->check() && auth()->user()->allow_adult !== true) {
+            $query->where('rating', '!=', 'questionable');
+        }
+
         $tags = Tag::with('subtags')->get();
-        $images = Artwork::whereHas('tags', function ($query) use ($tag) {
-            $query->where('tags.id', $tag->id);
-        })->paginate(50);
+        $images = $query->paginate(50);
 
         return view('welcome', compact('tags', 'images', 'tag'));
     }
