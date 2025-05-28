@@ -11,20 +11,17 @@ class FavoritesController extends Controller
 {
     public function toggle(Artwork $artwork)
     {
-        $userId = Auth::id();
+        $user = Auth::user();
+        $favorited = $artwork->favorites()->where('user_id', $user->id)->exists();
 
-        $favorites = Favorites::where('user_id', $userId)->where('artwork_id', $artwork->id)->first();
-
-        if ($favorites) {
-            $favorites->delete();
+        if ($favorited) {
+            $artwork->favorites()->where('user_id', $user->id)->delete();
         } else {
-            Favorites::create([
-                'id' => (string) Str::ulid(),
-                'user_id' => $userId,
-                'artwork_id' => $artwork->id,
-            ]);
+            $artwork->favorites()->create(['id' => (string) Str::ulid(), 'user_id' => $user->id]);
         }
 
-        return back();
+        return response()->json([
+            'favorited' => !$favorited,
+        ]);
     }
 }
