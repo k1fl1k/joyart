@@ -52,20 +52,22 @@
             </div>
         @else
             <div class="main">
-                <div class="filter-bar">
-                    <!-- Filter Dropdown -->
-                    <select name="filter" class="filter" id="filterDropdown">
-                        <option value="">All types</option>
-                        <option value="newest" {{ request('filter') == 'newest' ? 'selected' : '' }}>Новіші</option>
-                        <option value="oldest" {{ request('filter') == 'oldest' ? 'selected' : '' }}>Старіші</option>
-                        <option value="image" {{ request('filter') == 'image' ? 'selected' : '' }}>Тільки зображення</option>
-                        <option value="video" {{ request('filter') == 'video' ? 'selected' : '' }}>Тільки відео</option>
-                    </select>
-                </div>
                 <div class="gallery">
+                    <div class="profile-header">
+                        <div class="filter-bar">
+                            <!-- Filter Dropdown -->
+                            <select name="filter" class="rounded-lg bg-gray-800" id="filterDropdown">
+                                <option value="">All types</option>
+                                <option value="newest" {{ request('filter') == 'newest' ? 'selected' : '' }}>Новіші</option>
+                                <option value="oldest" {{ request('filter') == 'oldest' ? 'selected' : '' }}>Старіші</option>
+                                <option value="image" {{ request('filter') == 'image' ? 'selected' : '' }}>Тільки зображення</option>
+                                <option value="video" {{ request('filter') == 'video' ? 'selected' : '' }}>Тільки відео</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="">
                         <img src="" alt="" />
-                        <p>No images found</p>
+                        <p>No images found. Please authorize.</p>
                     </div>
                 </div>
             </div>
