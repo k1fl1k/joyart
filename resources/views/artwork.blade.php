@@ -58,27 +58,21 @@
                 @endif
                 <div class="artwork-actions">
                     <div class="flex items-center space-x-4 mb-4">
-                        <span class="likes-count">{{ $artwork->likes()->count() }} likes</span>
-                        <form action="{{ route('likes.toggle', $artwork->slug) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="like-button">
-                                @if ($artwork->isLikedByUser(auth()->id()))
-                                    Dislike
-                                @else
-                                    Like
-                                @endif
-                            </button>
-                        </form>
-                        <form action="{{ route('favorites.toggle', $artwork->slug) }}" method="POST">
-                            @csrf
-                            <button class="like-button">
-                                @if ($artwork->isFavoritedByUser(auth()->id()))
-                                    Unfavorite
-                                @else
-                                    Favorite
-                                @endif
-                            </button>
-                        </form>
+                        <span class="likes-count" data-artwork-id="{{ $artwork->id }}">{{ $artwork->likes()->count() }} likes</span>
+                        <button class="like-button"
+                                data-artwork-id="{{ $artwork->id }}"
+                                data-route="{{ route('likes.toggle', $artwork->slug) }}"
+                                data-csrf="{{ csrf_token() }}"
+                                onclick="toggleLike(this)">
+                            {{ $artwork->isLikedByUser(auth()->id()) ? 'Dislike' : 'Like' }}
+                        </button>
+                        <button class="favorite-button"
+                                data-artwork-id="{{ $artwork->id }}"
+                                data-route="{{ route('favorites.toggle', $artwork->slug) }}"
+                                data-csrf="{{ csrf_token() }}"
+                                onclick="toggleFavorite(this)">
+                            {{ $artwork->isFavoritedByUser(auth()->id()) ? 'Unfavorite' : 'Favorite' }}
+                        </button>
                         @if (Auth::check() && Auth::id() !== $artwork->user_id)
                             <button type="button" class="report-button" onclick="openReportModal()">Поскаржитись</button>
                         @endif
@@ -107,7 +101,6 @@
                                         <button type="submit">Видалити</button>
                                     </form>
                                 @endif
-
                             </div>
                         @endforeach
 
@@ -116,7 +109,6 @@
                             {{ $comments->links() }}
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -124,7 +116,7 @@
     <!-- Report Modal -->
     <div id="reportModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
         <div class="modal-content" style="background-color: #1c1c1c; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 500px; border-radius: 8px;">
-            <span class="close" onclick="closeReportModal()" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+            <span class="close" onclick="closeReportModal()" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">×</span>
             <h2 style="margin-bottom: 20px;">Поскаржитись на пост</h2>
 
             <form action="{{ route('artworks.report', $artwork->slug) }}" method="POST">
@@ -141,7 +133,7 @@
                 </div>
 
                 <div style="margin-bottom: 15px;">
-                    <label for="description" style="display: block; margin-bottom: 5px;">Опис проблеми (необов'язково):</label>
+                    <label for="description" style="display: block; margin-bottom: 5px;">Опис проблеми (необов’язково):</label>
                     <textarea name="description" id="description" rows="4" style="background-color: #222627; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
                 </div>
 
@@ -160,11 +152,80 @@
             document.getElementById('reportModal').style.display = 'none';
         }
 
-        // Close modal when clicking outside of it
         window.onclick = function(event) {
             const modal = document.getElementById('reportModal');
             if (event.target == modal) {
                 modal.style.display = 'none';
+            }
+        }
+
+        async function toggleLike(button) {
+            @if (!Auth::check())
+                window.location.href = "{{ route('login') }}";
+            return;
+            @endif
+
+            const artworkId = button.getAttribute('data-artwork-id');
+            const route = button.getAttribute('data-route');
+            const csrfToken = button.getAttribute('data-csrf');
+
+            try {
+                const response = await fetch(route, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                    },
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const likesCountElement = document.querySelector(`.likes-count[data-artwork-id="${artworkId}"]`);
+                    likesCountElement.textContent = `${data.likes_count} likes`;
+                    button.textContent = data.liked ? 'Dislike' : 'Like';
+                } else if (response.status === 401) {
+                    window.location.href = "{{ route('login') }}";
+                } else {
+                    console.error('Failed to toggle like:', response.statusText);
+                    alert('Failed to toggle like. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+
+        async function toggleFavorite(button) {
+            @if (!Auth::check())
+                window.location.href = "{{ route('login') }}";
+            return;
+            @endif
+
+            const artworkId = button.getAttribute('data-artwork-id');
+            const route = button.getAttribute('data-route');
+            const csrfToken = button.getAttribute('data-csrf');
+
+            try {
+                const response = await fetch(route, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                    },
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    button.textContent = data.favorited ? 'Unfavorite' : 'Favorite';
+                } else if (response.status === 401) {
+                    window.location.href = "{{ route('login') }}";
+                } else {
+                    console.error('Failed to toggle favorite:', response.statusText);
+                    alert('Failed to toggle favorite. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
             }
         }
     </script>
