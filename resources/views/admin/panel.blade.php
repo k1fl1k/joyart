@@ -29,9 +29,10 @@
                             <!-- User Panel -->
                             <div class="mt-6">
                                 <h3 class="admin-h1">Редагувати інформацію користувача</h3>
-                                <input type="text" id="userSearch" placeholder="Пошук користувача" class="admin-input">
-                                <div id="userSuggestions" class="search-suggestions"></div>
-
+                                <div class="relative w-full"> <!-- Add relative wrapper with full width -->
+                                    <input type="text" id="userSearch" placeholder="Пошук користувача" class="admin-input w-full">
+                                    <div id="userSuggestions" class="search-suggestions"></div>
+                                </div>
                                 <form action="{{ route('admin.updateUser') }}" method="POST" id="editUserForm">
                                     @csrf
                                     <input type="hidden" name="id" id="editUserId">

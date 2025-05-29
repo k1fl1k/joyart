@@ -436,22 +436,22 @@ body {
 
 .search-suggestions {
     position: absolute;
+    top: calc(100% + 5px); /* Adjust for margin-top */
+    left: 0;
+    right: 0;
+    width: 100%; /* Inherits from relative parent */
     background: #2a2a2a;
-    width: 100%;
-    z-index: 10;
+    z-index: 1000; /* Higher z-index to ensure it’s above other elements */
     padding: 8px;
     max-height: 200px;
-    max-width: 100%;
     overflow-y: auto;
-    display: none; /* За замовчуванням приховуємо */
+    display: none;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    top: 100%;
-    margin-top: 5px;
 }
 
 .search-suggestions.visible {
-    display: block; /* Показуємо тільки коли є результати */
+    display: block;
     animation: fadeIn 0.2s ease-in-out;
 }
 
@@ -1202,7 +1202,7 @@ body {
     color: #999999;
     background: #222627;
     width: 100%;
-    margin-bottom: 12px;
+    margin-bottom: 0px;
 }
 
 .admin-button {
